@@ -1,6 +1,9 @@
 #
-# Baseline CI for the `jsonpath` integration branch of the JSON-P JSONPath proposal.
-# Builds the API and runs the unchanged TCK (tck/, profile tck-tests-ci) against Parsson 1.1.9 and the freshly built API.
+# CI for the `jsonpath` integration branch of the JSON-P JSONPath proposal.
+# - api-and-tck: builds the API and runs the TCK (tck/, profile tck-tests-ci) against Parsson 1.1.9 and the freshly
+#   built API. Released Parsson has no JsonProvider.createPath, so this job excludes the JUnit tag `jsonpath`.
+# - jsonpath-tck-parsson-fork: runs only the `jsonpath` tests against christoph-sens/parsson@jsonpath, built with this API.
+#   A certification run of the TCK excludes no tag.
 #
 # JDK 11 is not in the matrix: the API build (maven.compiler release 17 / multi-release jar) and the TCK modules
 # (release 17) need at least JDK 17. The API itself still targets Java 11 bytecode.
@@ -35,11 +38,53 @@ jobs:
       - name: Build and install API
         run: cd api && mvn -B -V -U -C -Poss-release -Pstaging clean install -Dgpg.skip=true
       - name: TCK against Parsson
-        run: cd tck && mvn -B -V -U -C -Ptck-tests-ci -Pstaging -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT clean verify
+        run: cd tck && mvn -B -V -U -C -Ptck-tests-ci -Pstaging -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT -DexcludedGroups=jsonpath clean verify
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: tck-reports-jdk${{ matrix.java_version }}
+          path: tck/**/target/surefire-reports
+          if-no-files-found: ignore
+
+  jsonpath-tck-parsson-fork:
+    name: JSONPath TCK against Parsson fork on JDK ${{ matrix.java_version }}
+    runs-on: ubuntu-latest
+    # Informational: Parsson implements createPath only with ticket D6 (JsonProviderImpl.createPath) in
+    # christoph-sens/parsson; until then every JSONPath test fails with UnsupportedOperationException.
+    # Remove continue-on-error once D6 is merged into christoph-sens/parsson@jsonpath.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        java_version: [ 17, 21, 25 ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Parsson fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/parsson
+          ref: jsonpath
+          path: parsson
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java_version }}
+          cache: maven
+      - name: Build and install API
+        run: cd api && mvn -B -V -U -C -Poss-release -Pstaging clean install -Dgpg.skip=true
+      - name: Build and install Parsson with this API
+        run: |
+          cd parsson
+          git log -1 --format='Parsson fork at %H %s'
+          mvn -B -V -U -C -Pstaging clean install -pl impl -am -DskipTests -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT
+          echo "PARSSON_VERSION=$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)" >> "$GITHUB_ENV"
+      - name: JSONPath TCK against Parsson ${{ env.PARSSON_VERSION }}
+        run: cd tck && mvn -B -V -U -C -Ptck-tests-ci -Pstaging -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT -Dparsson.version=${{ env.PARSSON_VERSION }} -Dgroups=jsonpath -pl tck-tests -am clean verify
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jsonpath-tck-parsson-fork-reports-jdk${{ matrix.java_version }}
           path: tck/**/target/surefire-reports
           if-no-files-found: ignore

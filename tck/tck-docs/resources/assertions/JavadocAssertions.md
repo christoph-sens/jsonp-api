@@ -21,8 +21,8 @@
 
 | Totals | Total | Active | Deprecated | Removed |
 |:-------|:-----:|:------:|:----------:|:-------:|
-| # of Assertions | 412 | 282 | 0 | 130 |
-| # of Required Assertions | 412 | 282 | 0 | 130 |
+| # of Assertions | 419 | 289 | 0 | 130 |
+| # of Required Assertions | 419 | 289 | 0 | 130 |
 | # of Optional Assertions | 0 | 0 | 0 | 0 |
 
 | ID | Return | Method/Field | Description | Required | Deprecated | Testable |
@@ -312,3 +312,10 @@
 | JSONP:JAVADOC:681 | enum | jakarta.json.JsonConfig.KeyStrategy | Defines the different values allowed for KEY_STRATEGY. | true |  | true |
 | JSONP:JAVADOC:682 | JsonNumber | jakarta.json.Json.createValue(Number value) | Creates a JsonNumber. | true |  | true |
 | JSONP:JAVADOC:683 | Event | jakarta.json.stream.JsonParser.currentEvent | The event for the current parsing state. | true |  | true |
+| JSONP:JAVADOC:684 | JsonPath | jakarta.json.Json.createPath ( String ) | Creates a JSONPath query (RFC 9535) from the given query string. Throws JsonException if the query is not a well-formed and valid JSONPath query, NullPointerException if it is null. | true |  | true |
+| JSONP:JAVADOC:685 | JsonPath | jakarta.json.spi.JsonProvider.createPath ( String ) | Creates a JSONPath query (RFC 9535) from the given query string. Throws JsonException if the query is not a well-formed and valid JSONPath query, NullPointerException if it is null. The default implementation throws UnsupportedOperationException. | true |  | true |
+| JSONP:JAVADOC:686 | List | jakarta.json.JsonPath.query ( JsonValue ) | Applies this query to the specified target and returns the selected nodes, in the order defined by RFC 9535, as an unmodifiable list. A node selected more than once appears as many times in the list. | true |  | true |
+| JSONP:JAVADOC:687 | String | jakarta.json.JsonPath.toString | Returns the query string this JSONPath was created from. | true |  | true |
+| JSONP:JAVADOC:688 | JsonValue | jakarta.json.JsonPath.Node.getValue | Returns the value of this node; never null, JSON null is JsonValue.NULL. | true |  | true |
+| JSONP:JAVADOC:689 | String | jakarta.json.JsonPath.Node.getPath | Returns the location of this node as a Normalized Path (RFC 9535, section 2.7). | true |  | true |
+| JSONP:JAVADOC:690 | JsonPointer | jakarta.json.JsonPath.Node.getPointer | Returns the location of this node as a JSON Pointer (RFC 6901). The pointer of the root node is the empty pointer. Applied to the query argument, the pointer references the value of this node. | true |  | true |
