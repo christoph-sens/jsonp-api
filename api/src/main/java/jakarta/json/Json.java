@@ -326,6 +326,24 @@ public final class Json {
     }
 
     /**
+     * Creates a JSONPath query (<a href="https://www.rfc-editor.org/rfc/rfc9535">RFC 9535</a>)
+     * from the given {@code query} string, for example {@code $.store.book[*].title}.
+     *
+     * @param query the JSONPath query string
+     * @throws NullPointerException if {@code query} is {@code null}
+     * @throws JsonException if {@code query} is not a well-formed and valid JSONPath query;
+     *     the message gives the reason and the position in {@code query}
+     * @throws UnsupportedOperationException if the JSON provider does not support JSONPath
+     * @return a JSONPath query
+     * @see JsonPath
+     *
+     * @since 2.2
+     */
+    public static JsonPath createPath(String query) {
+        return JsonProvider.provider().createPath(query);
+    }
+
+    /**
      * Creates a JSON Patch builder (<a href="http://tools.ietf.org/html/rfc6902">RFC 6902</a>).
      *
      * @return a JSON Patch builder

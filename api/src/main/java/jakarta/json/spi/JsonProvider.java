@@ -41,6 +41,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonPatch;
 import jakarta.json.JsonPatchBuilder;
+import jakarta.json.JsonPath;
 import jakarta.json.JsonPointer;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonReaderFactory;
@@ -372,6 +373,27 @@ public abstract class JsonProvider {
      * @since 1.1
      */
     public JsonPointer createPointer(String jsonPointer) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Creates a JSONPath query (<a href="https://www.rfc-editor.org/rfc/rfc9535">RFC 9535</a>)
+     * from the given {@code query} string, for example {@code $.store.book[*].title}.
+     * <p>The default implementation throws {@link UnsupportedOperationException};
+     * providers that support JSONPath override it.</p>
+     *
+     * @param query the JSONPath query string
+     * @throws NullPointerException if {@code query} is {@code null}
+     * @throws JsonException if {@code query} is not a well-formed and valid JSONPath query;
+     *     the message gives the reason and the position in {@code query}
+     * @throws UnsupportedOperationException if the provider does not support JSONPath
+     * @return a JSONPath query
+     * @see JsonPath
+     * @see jakarta.json.Json#createPath(String)
+     *
+     * @since 2.2
+     */
+    public JsonPath createPath(String query) {
         throw new UnsupportedOperationException();
     }
 

@@ -21,6 +21,7 @@ meth public static jakarta.json.JsonPatch createDiff(jakarta.json.JsonStructure,
 meth public static jakarta.json.JsonPatch createPatch(jakarta.json.JsonArray)
 meth public static jakarta.json.JsonPatchBuilder createPatchBuilder()
 meth public static jakarta.json.JsonPatchBuilder createPatchBuilder(jakarta.json.JsonArray)
+meth public static jakarta.json.JsonPath createPath(java.lang.String)
 meth public static jakarta.json.JsonPointer createPointer(java.lang.String)
 meth public static jakarta.json.JsonReader createReader(java.io.InputStream)
 meth public static jakarta.json.JsonReader createReader(java.io.Reader)
@@ -212,6 +213,17 @@ meth public abstract jakarta.json.JsonPatchBuilder test(java.lang.String,int)
 meth public abstract jakarta.json.JsonPatchBuilder test(java.lang.String,jakarta.json.JsonValue)
 meth public abstract jakarta.json.JsonPatchBuilder test(java.lang.String,java.lang.String)
 
+CLSS public abstract interface jakarta.json.JsonPath
+innr public abstract static interface Node
+meth public abstract java.lang.String toString()
+meth public abstract java.util.List<jakarta.json.JsonPath$Node> query(jakarta.json.JsonValue)
+
+CLSS public abstract static interface jakarta.json.JsonPath$Node
+ outer jakarta.json.JsonPath
+meth public abstract jakarta.json.JsonPointer getPointer()
+meth public abstract jakarta.json.JsonValue getValue()
+meth public abstract java.lang.String getPath()
+
 CLSS public abstract interface jakarta.json.JsonPointer
 meth public abstract <%0 extends jakarta.json.JsonStructure> {%%0} add({%%0},jakarta.json.JsonValue)
 meth public abstract <%0 extends jakarta.json.JsonStructure> {%%0} remove({%%0})
@@ -318,6 +330,7 @@ meth public jakarta.json.JsonPatch createDiff(jakarta.json.JsonStructure,jakarta
 meth public jakarta.json.JsonPatch createPatch(jakarta.json.JsonArray)
 meth public jakarta.json.JsonPatchBuilder createPatchBuilder()
 meth public jakarta.json.JsonPatchBuilder createPatchBuilder(jakarta.json.JsonArray)
+meth public jakarta.json.JsonPath createPath(java.lang.String)
 meth public jakarta.json.JsonPointer createPointer(java.lang.String)
 meth public jakarta.json.JsonString createValue(java.lang.String)
 meth public static jakarta.json.spi.JsonProvider provider()
