@@ -260,6 +260,29 @@ public class JsonPathStreamingTests {
   }
 
   /**
+   * @testName: jsonPathMatcherRfcOrderTest
+   *
+   * @assertion_ids: JSONP:JAVADOC:694; JSONP:JAVADOC:695;
+   *
+   * @test_Strategy: For a query without descendant segments, with a single selector per
+   * segment and no slice with a negative step, the matcher reports the matches in the order
+   * of query() on a value read from the same text, without sorting.
+   */
+  @Test
+  public void jsonPathMatcherRfcOrderTest() {
+    final String store = "{\"store\": {\"book\": [{\"title\": \"A\", \"price\": 8}, "
+        + "{\"title\": \"B\", \"price\": 12, \"isbn\": \"x\"}, {\"price\": 9, \"title\": \"C\"}], "
+        + "\"bicycle\": {\"price\": 399, \"color\": \"red\"}}, \"z\": [[1, 2], [3, [4, 5]], 6]}";
+    final String[] queries = {"$", "$.store.book[*].title", "$.store.*.price", "$.store.*.*", "$.*",
+        "$.store.book[?@.price < 10].title", "$.store.book[-1]", "$.store.book[1:]", "$.store.book[:-1].*",
+        "$.z[*][*]", "$.z[*][-1]", "$.z[?@[0] > 1][1]", "$.z[0:3:2]", "$[*][*][*]"};
+    for (String query : queries) {
+      final JsonPath path = Json.createPath(query);
+      assertEquals(JsonPathUtil.paths(path.query(parse(store))), paths(query, store), query);
+    }
+  }
+
+  /**
    * @testName: jsonPathMatcherRepeatedMatchTest
    *
    * @assertion_ids: JSONP:JAVADOC:694; JSONP:JAVADOC:698;
@@ -475,6 +498,11 @@ public class JsonPathStreamingTests {
       }
     }
     if (path.getBuffering() == Buffering.NONE) {
+      final JsonPath unbuffered = Json.createPath(query, Map.of(JsonPath.MAX_BUFFERED_NODES, 0));
+      for (Take take : Take.values()) {
+        assertEquals(expected.size(), stream(unbuffered, json, take).size(),
+            context + ": class NONE with maxBufferedNodes 0, taking " + take + " values");
+      }
       try (JsonParser parser = parser(json)) {
         final JsonPath.Matcher matcher = path.matcher(parser);
         while (matcher.find()) {

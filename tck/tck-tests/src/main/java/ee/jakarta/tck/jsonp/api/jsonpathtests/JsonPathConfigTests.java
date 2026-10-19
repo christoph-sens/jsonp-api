@@ -113,7 +113,7 @@ public class JsonPathConfigTests {
    *
    * @test_Strategy: The value of a configuration property is a non-negative integer given
    * as a Number or a decimal String. Negative numbers, non-integers, other strings and other
-   * types make createPath throw JsonException, for each of the five properties.
+   * types make createPath throw JsonException, for each of the six properties.
    */
   @Test
   public void jsonPathConfigValuesTest() {
@@ -123,7 +123,8 @@ public class JsonPathConfigTests {
       assertThrows(JsonException.class, () -> path.query(document), "maxResultSize " + value);
     }
     final String[] properties = {JsonPath.MAX_VISITED_NODES, JsonPath.MAX_DEPTH,
-        JsonPath.MAX_RESULT_SIZE, JsonPath.MAX_NESTING, JsonPath.MAX_REGEX_SIZE};
+        JsonPath.MAX_RESULT_SIZE, JsonPath.MAX_BUFFERED_NODES, JsonPath.MAX_NESTING,
+        JsonPath.MAX_REGEX_SIZE};
     for (String property : properties) {
       for (Object value : new Object[] {-1, -1L, "-1", "abc", 1.5, Boolean.TRUE, new Object()}) {
         assertThrows(JsonException.class, () -> path("$", property, value), property + " = " + value);
@@ -197,6 +198,68 @@ public class JsonPathConfigTests {
     final JsonPath descendants = Json.createPath("$..*");
     assertEquals(1_000, descendants.query(nestedArrays(1_000)).size());
     assertThrows(JsonException.class, () -> descendants.query(nestedArrays(1_001)));
+  }
+
+  /**
+   * @testName: jsonPathMaxDepthReachedTest
+   *
+   * @assertion_ids: JSONP:JAVADOC:700;
+   *
+   * @test_Strategy: An evaluation throws JsonException when it reaches a node deeper than
+   * maxDepth, whichever selector reaches it: names and indices, wildcards, filters, slices
+   * and descendant segments alike, for query() and the matcher. A node that is not reached
+   * does not count: an empty array at the limit, or a name that selects nothing.
+   */
+  @Test
+  public void jsonPathMaxDepthReachedTest() {
+    final String json = "[[[1]]]";
+    for (String query : new String[] {"$[0][0][0]", "$[*][*][*]", "$..*", "$[0][0][?@ == 1]",
+        "$[0][0][0:1]"}) {
+      assertEquals(1, path(query, JsonPath.MAX_DEPTH, 3).query(parse(json)).size() > 0 ? 1 : 0, query);
+      streamCount(path(query, JsonPath.MAX_DEPTH, 3), json);
+      assertThrows(JsonException.class, () -> path(query, JsonPath.MAX_DEPTH, 2).query(parse(json)), query);
+      assertThrows(JsonException.class, () -> streamCount(path(query, JsonPath.MAX_DEPTH, 2), json), query);
+    }
+    assertEquals(2, path("$..*", JsonPath.MAX_DEPTH, 2).query(parse("[[[]]]")).size());
+    assertEquals(2, streamCount(path("$..*", JsonPath.MAX_DEPTH, 2), "[[[]]]"));
+    assertEquals(0, path("$[0][0].x", JsonPath.MAX_DEPTH, 2).query(parse(json)).size());
+    assertEquals(0, streamCount(path("$[0][0].x", JsonPath.MAX_DEPTH, 2), json));
+  }
+
+  /**
+   * @testName: jsonPathMaxBufferedNodesTest
+   *
+   * @assertion_ids: JSONP:JAVADOC:701;
+   *
+   * @test_Strategy: maxBufferedNodes limits the nodes the matcher holds because it cannot
+   * report or decide them yet; exceeding it throws JsonException from find(). A filter that
+   * tests a child of 12 nodes holds them until it is decided, so the limit 11 fails and the
+   * limit 1,000 does not. $[-500] keeps at least 500 elements undecided, so the limit 100
+   * fails. A query of class NONE holds nothing and works with the limit 0, also when the
+   * caller takes every value. The limit does not apply to query().
+   */
+  @Test
+  public void jsonPathMaxBufferedNodesTest() {
+    final String candidate = "[{\"a\": 1, \"b\": [1, 2, 3, 4, 5, 6, 7, 8, 9]}]";
+    assertEquals(1, streamCount(path("$[?@.a]", JsonPath.MAX_BUFFERED_NODES, 1_000), candidate));
+    assertThrows(JsonException.class, () -> streamCount(path("$[?@.a]", JsonPath.MAX_BUFFERED_NODES, 11), candidate));
+    assertEquals(1, path("$[?@.a]", JsonPath.MAX_BUFFERED_NODES, 0).query(parse(candidate)).size());
+
+    final String numbers = numbers(1_000);
+    assertThrows(JsonException.class, () -> streamCount(path("$[-500]", JsonPath.MAX_BUFFERED_NODES, 100), numbers));
+    assertEquals(1, streamCount(path("$[-500]", JsonPath.MAX_BUFFERED_NODES, 10_000), numbers));
+
+    for (String query : new String[] {"$..*", "$[*]", "$[0,0]", "$[::-1]", "$..[0]"}) {
+      final JsonPath path = path(query, JsonPath.MAX_BUFFERED_NODES, 0);
+      assertEquals(JsonPath.Buffering.NONE, path.getBuffering(), query);
+      try (JsonParser parser = Json.createParser(new StringReader("[[1, [2]], {\"a\": [3]}]"))) {
+        final JsonPath.Matcher matcher = path.matcher(parser);
+        while (matcher.find()) {
+          assertNotNull(matcher.getValue(), query);
+        }
+      }
+    }
+    assertEquals("jakarta.json.JsonPath.maxBufferedNodes", JsonPath.MAX_BUFFERED_NODES);
   }
 
   /**
