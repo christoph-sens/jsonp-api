@@ -41,6 +41,19 @@ final class JsonPathUtil {
    */
   static final String TAG = "jsonpath";
 
+  /**
+   * JUnit tag of the tests of the streaming layer ({@link JsonPath#matcher}), in addition
+   * to {@link #TAG}. Lets CI exclude them for an implementation that does not provide the
+   * streaming layer yet; a certification run excludes no tag.
+   */
+  static final String STREAMING_TAG = "jsonpath-streaming";
+
+  /**
+   * JUnit tag of the tests of {@code Json.createPath(String, Map)}, in addition to
+   * {@link #TAG}; see {@link #STREAMING_TAG}.
+   */
+  static final String CONFIG_TAG = "jsonpath-config";
+
   private JsonPathUtil() {
   }
 
