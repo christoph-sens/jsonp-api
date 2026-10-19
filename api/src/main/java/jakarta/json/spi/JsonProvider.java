@@ -398,6 +398,30 @@ public abstract class JsonProvider {
     }
 
     /**
+     * Creates a JSONPath query (<a href="https://www.rfc-editor.org/rfc/rfc9535">RFC 9535</a>)
+     * from the given {@code query} string, with the limits given in {@code config}; see
+     * {@link jakarta.json.Json#createPath(String, Map)}.
+     * <p>The default implementation throws {@link UnsupportedOperationException};
+     * providers that support JSONPath override it.</p>
+     *
+     * @param query the JSONPath query string
+     * @param config a map of configuration properties, possibly empty
+     * @throws NullPointerException if {@code query} or {@code config} is {@code null}
+     * @throws JsonException if {@code query} is not a well-formed and valid JSONPath query, if it
+     *     exceeds a limit that is checked when the query is created, or if the value of a
+     *     configuration property is not valid
+     * @throws UnsupportedOperationException if the provider does not support JSONPath
+     * @return a JSONPath query
+     * @see JsonPath
+     * @see jakarta.json.Json#createPath(String, Map)
+     *
+     * @since 2.2
+     */
+    public JsonPath createPath(String query, Map<String, ?> config) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Creates a JSON Patch builder (<a href="http://tools.ietf.org/html/rfc6902">RFC 6902</a>).
      *
      * @return a JSON Patch builder

@@ -344,6 +344,29 @@ public final class Json {
     }
 
     /**
+     * Creates a JSONPath query (<a href="https://www.rfc-editor.org/rfc/rfc9535">RFC 9535</a>)
+     * from the given {@code query} string, with limits for queries and documents from untrusted
+     * sources. The map contains the configuration properties defined in {@link JsonPath}, such as
+     * {@link JsonPath#MAX_VISITED_NODES}, and may contain provider specific properties. Properties
+     * the provider does not support are ignored; a limit that is not in the map has its default.
+     *
+     * @param query the JSONPath query string
+     * @param config a map of configuration properties, possibly empty
+     * @throws NullPointerException if {@code query} or {@code config} is {@code null}
+     * @throws JsonException if {@code query} is not a well-formed and valid JSONPath query, if it
+     *     exceeds a limit that is checked when the query is created, or if the value of a
+     *     configuration property is not valid
+     * @throws UnsupportedOperationException if the JSON provider does not support JSONPath
+     * @return a JSONPath query
+     * @see JsonPath
+     *
+     * @since 2.2
+     */
+    public static JsonPath createPath(String query, Map<String, ?> config) {
+        return JsonProvider.provider().createPath(query, config);
+    }
+
+    /**
      * Creates a JSON Patch builder (<a href="http://tools.ietf.org/html/rfc6902">RFC 6902</a>).
      *
      * @return a JSON Patch builder

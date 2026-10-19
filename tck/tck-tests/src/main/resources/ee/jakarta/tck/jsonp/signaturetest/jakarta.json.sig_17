@@ -22,6 +22,7 @@ meth public static jakarta.json.JsonPatch createPatch(jakarta.json.JsonArray)
 meth public static jakarta.json.JsonPatchBuilder createPatchBuilder()
 meth public static jakarta.json.JsonPatchBuilder createPatchBuilder(jakarta.json.JsonArray)
 meth public static jakarta.json.JsonPath createPath(java.lang.String)
+meth public static jakarta.json.JsonPath createPath(java.lang.String,java.util.Map<java.lang.String,?>)
 meth public static jakarta.json.JsonPointer createPointer(java.lang.String)
 meth public static jakarta.json.JsonReader createReader(java.io.InputStream)
 meth public static jakarta.json.JsonReader createReader(java.io.Reader)
@@ -214,9 +215,35 @@ meth public abstract jakarta.json.JsonPatchBuilder test(java.lang.String,jakarta
 meth public abstract jakarta.json.JsonPatchBuilder test(java.lang.String,java.lang.String)
 
 CLSS public abstract interface jakarta.json.JsonPath
+fld public final static java.lang.String MAX_DEPTH = "jakarta.json.JsonPath.maxDepth"
+fld public final static java.lang.String MAX_NESTING = "jakarta.json.JsonPath.maxNesting"
+fld public final static java.lang.String MAX_REGEX_SIZE = "jakarta.json.JsonPath.maxRegexSize"
+fld public final static java.lang.String MAX_RESULT_SIZE = "jakarta.json.JsonPath.maxResultSize"
+fld public final static java.lang.String MAX_VISITED_NODES = "jakarta.json.JsonPath.maxVisitedNodes"
+innr public abstract static interface Matcher
 innr public abstract static interface Node
+innr public final static !enum Buffering
 meth public abstract java.lang.String toString()
 meth public abstract java.util.List<jakarta.json.JsonPath$Node> query(jakarta.json.JsonValue)
+meth public jakarta.json.JsonPath$Buffering getBuffering()
+meth public jakarta.json.JsonPath$Matcher matcher(jakarta.json.stream.JsonParser)
+
+CLSS public final static !enum jakarta.json.JsonPath$Buffering
+ outer jakarta.json.JsonPath
+fld public final static jakarta.json.JsonPath$Buffering BOUNDED
+fld public final static jakarta.json.JsonPath$Buffering NONE
+fld public final static jakarta.json.JsonPath$Buffering UNBOUNDED
+meth public static jakarta.json.JsonPath$Buffering valueOf(java.lang.String)
+meth public static jakarta.json.JsonPath$Buffering[] values()
+supr java.lang.Enum<jakarta.json.JsonPath$Buffering>
+
+CLSS public abstract static interface jakarta.json.JsonPath$Matcher
+ outer jakarta.json.JsonPath
+meth public abstract boolean find()
+meth public abstract jakarta.json.JsonPointer getPointer()
+meth public abstract jakarta.json.JsonValue getValue()
+meth public abstract jakarta.json.stream.JsonLocation getLocation()
+meth public abstract java.lang.String getPath()
 
 CLSS public abstract static interface jakarta.json.JsonPath$Node
  outer jakarta.json.JsonPath
@@ -331,6 +358,7 @@ meth public jakarta.json.JsonPatch createPatch(jakarta.json.JsonArray)
 meth public jakarta.json.JsonPatchBuilder createPatchBuilder()
 meth public jakarta.json.JsonPatchBuilder createPatchBuilder(jakarta.json.JsonArray)
 meth public jakarta.json.JsonPath createPath(java.lang.String)
+meth public jakarta.json.JsonPath createPath(java.lang.String,java.util.Map<java.lang.String,?>)
 meth public jakarta.json.JsonPointer createPointer(java.lang.String)
 meth public jakarta.json.JsonString createValue(java.lang.String)
 meth public static jakarta.json.spi.JsonProvider provider()
