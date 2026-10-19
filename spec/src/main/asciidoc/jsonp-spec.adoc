@@ -27,3 +27,5 @@ include::license-efsl.adoc[]
 // == Spec
 :sectnums:
 include::jsonp.adoc[]
+
+include::jsonpath.adoc[]

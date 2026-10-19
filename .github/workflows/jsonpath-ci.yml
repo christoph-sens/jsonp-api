@@ -7,6 +7,8 @@
 # - jsonpath-tck-johnzon-fork: the same against christoph-sens/johnzon@jsonpath. The TCK module wires its provider
 #   as org.eclipse.parsson:parsson:${parsson.version}, so the job installs the Johnzon core jar under that
 #   coordinate with the version `johnzon-fork` (the TCK sources stay untouched).
+# - spec: builds the specification document (spec/, HTML and PDF); Asciidoctor warnings and unresolved cross
+#   references fail the job.
 #
 # JDK 11 is not in the matrix: the API build (maven.compiler release 17 / multi-release jar) and the TCK modules
 # (release 17) need at least JDK 17. The API itself still targets Java 11 bytecode.
@@ -49,6 +51,31 @@ jobs:
           name: tck-reports-jdk${{ matrix.java_version }}
           path: tck/**/target/surefire-reports
           if-no-files-found: ignore
+
+  spec:
+    name: Specification document
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+      - name: Build HTML and PDF
+        run: cd spec && mvn -B -V -U -C clean install
+      - name: Check cross references
+        run: |
+          html=$(ls spec/target/generated-docs/jsonp-spec-*.html)
+          grep -o 'href="#[^"]*"' "$html" | sed 's/^href="#//; s/"$//' | sort -u > hrefs.txt
+          grep -o ' id="[^"]*"' "$html" | sed 's/^ id="//; s/"$//' | sort -u > ids.txt
+          missing=$(comm -23 hrefs.txt ids.txt)
+          if [ -n "$missing" ]; then echo "Unresolved cross references: $missing"; exit 1; fi
+      - name: Upload specification
+        uses: actions/upload-artifact@v4
+        with:
+          name: jsonp-spec
+          path: spec/target/generated-docs/jsonp-spec-*
 
   jsonpath-tck-parsson-fork:
     name: JSONPath TCK against Parsson fork on JDK ${{ matrix.java_version }}

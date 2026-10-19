@@ -147,7 +147,14 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <sourceDocumentName>jsonp-spec.adoc</sourceDocumentName>             
+                    <sourceDocumentName>jsonp-spec.adoc</sourceDocumentName>
+                    <!-- Unresolved cross references and other warnings fail the build -->
+                    <logHandler>
+                        <outputToConsole>true</outputToConsole>
+                        <failIf>
+                            <severity>WARN</severity>
+                        </failIf>
+                    </logHandler>
                     <attributes>
                         <revnumber>${project.version}</revnumber>
                         <revremark>${status}</revremark>
