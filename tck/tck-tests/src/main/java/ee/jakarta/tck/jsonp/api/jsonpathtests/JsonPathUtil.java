@@ -19,10 +19,15 @@ package ee.jakarta.tck.jsonp.api.jsonpathtests;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonPath;
 import jakarta.json.JsonReader;
+import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 
 /**
@@ -63,6 +68,52 @@ final class JsonPathUtil {
       paths.add(node.getPath());
     }
     return paths;
+  }
+
+  /**
+   * Compares two JSON values structurally, numbers by {@link java.math.BigDecimal#compareTo}
+   * and objects regardless of member order.
+   *
+   * @param a a value
+   * @param b another value
+   * @return whether the values are equal
+   */
+  static boolean sameValue(final JsonValue a, final JsonValue b) {
+    if (a.getValueType() != b.getValueType()) {
+      return false;
+    }
+    switch (a.getValueType()) {
+      case NUMBER:
+        return ((JsonNumber) a).bigDecimalValue().compareTo(((JsonNumber) b).bigDecimalValue()) == 0;
+      case STRING:
+        return ((JsonString) a).getString().equals(((JsonString) b).getString());
+      case ARRAY:
+        final JsonArray x = a.asJsonArray();
+        final JsonArray y = b.asJsonArray();
+        if (x.size() != y.size()) {
+          return false;
+        }
+        for (int i = 0; i < x.size(); i++) {
+          if (!sameValue(x.get(i), y.get(i))) {
+            return false;
+          }
+        }
+        return true;
+      case OBJECT:
+        final JsonObject o = a.asJsonObject();
+        final JsonObject p = b.asJsonObject();
+        if (!o.keySet().equals(p.keySet())) {
+          return false;
+        }
+        for (Map.Entry<String, JsonValue> member : o.entrySet()) {
+          if (!sameValue(member.getValue(), p.get(member.getKey()))) {
+            return false;
+          }
+        }
+        return true;
+      default:
+        return true;
+    }
   }
 
   /**
