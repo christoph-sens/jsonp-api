@@ -224,10 +224,10 @@ fld public final static java.lang.String MAX_VISITED_NODES = "jakarta.json.JsonP
 innr public abstract static interface Matcher
 innr public abstract static interface Node
 innr public final static !enum Buffering
+meth public abstract jakarta.json.JsonPath$Buffering getBuffering()
+meth public abstract jakarta.json.JsonPath$Matcher matcher(jakarta.json.stream.JsonParser)
 meth public abstract java.lang.String toString()
 meth public abstract java.util.List<jakarta.json.JsonPath$Node> query(jakarta.json.JsonValue)
-meth public jakarta.json.JsonPath$Buffering getBuffering()
-meth public jakarta.json.JsonPath$Matcher matcher(jakarta.json.stream.JsonParser)
 
 CLSS public final static !enum jakarta.json.JsonPath$Buffering
  outer jakarta.json.JsonPath

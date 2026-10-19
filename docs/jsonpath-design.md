@@ -425,13 +425,11 @@ counts as a visit, plus the visits of filters on buffered candidates. `maxResult
 - `JsonProvider.createPath` (both overloads) has a default implementation, so existing providers keep
   compiling and linking; their `Json.createPath` throws `UnsupportedOperationException` until they
   implement it.
-- `JsonPath.getBuffering()` and `JsonPath.matcher()` become abstract methods (decided Q8). `JsonPath` is
+- `JsonPath.getBuffering()` and `JsonPath.matcher()` are abstract methods (decided Q8). `JsonPath` is
   new in 2.2, so there is no implementation to stay compatible with, and JSON-P declares the methods of
   its interfaces abstract unless they are added to an existing interface (as `JsonParser.getObject()`
   in 1.1). An implementation without streaming is not an implementation of 2.2, and an abstract method
-  makes that a compile error rather than a runtime `UnsupportedOperationException`. They are default
-  methods only until both implementations in the forks provide them, because CI builds Parsson and
-  Johnzon against this branch. `JsonProvider.createPath(String, Map)` keeps its default, as
+  makes that a compile error rather than a runtime `UnsupportedOperationException`. `JsonProvider.createPath(String, Map)` keeps its default, as
   `JsonProvider` is an existing class.
 - No new package and no change to `module-info.java`: `JsonPath` lives in `jakarta.json` next to
   `JsonPointer`.

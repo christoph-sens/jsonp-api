@@ -213,17 +213,12 @@ public interface JsonPath {
     /**
      * Returns how much this query must buffer when it is evaluated over a {@link JsonParser} with
      * {@link #matcher matcher()}. The result depends on the query alone, see {@link Buffering}.
-     * <p>The default implementation throws {@link UnsupportedOperationException}; implementations
-     * of this specification override it.</p>
      *
      * @return the buffering class of this query
-     * @throws UnsupportedOperationException if the implementation does not support streaming
      *
      * @since 2.2
      */
-    default Buffering getBuffering() {
-        throw new UnsupportedOperationException();
-    }
+    Buffering getBuffering();
 
     /**
      * Returns a matcher that evaluates this query over the JSON value that {@code parser} reads next,
@@ -235,20 +230,15 @@ public interface JsonPath {
      * document order; see {@link Matcher}. A query whose {@link #getBuffering() buffering class} is
      * {@link Buffering#UNBOUNDED UNBOUNDED} is rejected: it may need the whole document, which is
      * what this method avoids. Callers that accept that evaluate {@code query(parser.getValue())}.</p>
-     * <p>The default implementation throws {@link UnsupportedOperationException}; implementations
-     * of this specification override it.</p>
      *
      * @param parser the parser to read the query argument from
      * @return a matcher over {@code parser}
      * @throws NullPointerException if {@code parser} is {@code null}
      * @throws JsonException if the buffering class of this query is {@link Buffering#UNBOUNDED}
-     * @throws UnsupportedOperationException if the implementation does not support streaming
      *
      * @since 2.2
      */
-    default Matcher matcher(JsonParser parser) {
-        throw new UnsupportedOperationException();
-    }
+    Matcher matcher(JsonParser parser);
 
     /**
      * <p>How much a query must buffer when {@link JsonPath#matcher matcher()} evaluates it over a
