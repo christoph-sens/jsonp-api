@@ -65,7 +65,8 @@ import jakarta.json.stream.JsonParser;
  * sources cannot exhaust time or memory. A query that exceeds such a limit fails with a
  * {@link JsonException}; it never returns a partial result. The limits are configured with
  * {@link Json#createPath(String, java.util.Map)} and the properties {@link #MAX_VISITED_NODES},
- * {@link #MAX_DEPTH}, {@link #MAX_RESULT_SIZE}, {@link #MAX_NESTING} and {@link #MAX_REGEX_SIZE};
+ * {@link #MAX_DEPTH}, {@link #MAX_RESULT_SIZE}, {@link #MAX_BUFFERED_NODES}, {@link #MAX_NESTING} and
+ * {@link #MAX_REGEX_SIZE};
  * {@link Json#createPath(String)} uses the defaults given there.</p>
  *
  * <p>The method {@link #matcher matcher()} evaluates a query over a {@link JsonParser}, so that
@@ -111,11 +112,17 @@ public interface JsonPath {
     String MAX_VISITED_NODES = "jakarta.json.JsonPath.maxVisitedNodes";
 
     /**
-     * Configuration property to limit how deep an evaluation walks into the query argument and how
+     * Configuration property to limit how deep an evaluation reaches into the query argument and how
      * deep {@code ==} and {@code !=} compare values. The query argument has depth 0, its children
-     * depth 1. The value is a non-negative integer. The default is 1,000.
-     * <p>Reaching a node below the limit throws {@link JsonException} from {@link #query query()} or
-     * {@link Matcher#find()}.</p>
+     * depth 1. An evaluation <i>reaches</i> a node when a selector selects or tests it or a
+     * descendant segment walks through it, also within queries inside filters; reaching a node deeper
+     * than the limit throws {@link JsonException} from {@link #query query()} or
+     * {@link Matcher#find()}. Comparisons count the depth from the compared values and throw when
+     * they would compare values nested deeper than the limit. The value is a non-negative integer.
+     * The default is 1,000.
+     * <p>The matcher reaches every element of an array as a candidate of an index or slice counted
+     * from the end, while {@code query()} reaches only the selected ones, so for the same query and
+     * document the matcher may throw where {@code query()} does not.</p>
      *
      * @see Json#createPath(String, java.util.Map)
      * @since 2.2
@@ -132,6 +139,25 @@ public interface JsonPath {
      * @since 2.2
      */
     String MAX_RESULT_SIZE = "jakarta.json.JsonPath.maxResultSize";
+
+    /**
+     * Configuration property to limit what {@link #matcher matcher()} buffers: the number of nodes in
+     * the values it holds at one time because it cannot report or decide them when the parser
+     * reaches them. These are the matches that wait for a decision of a filter or of an index or
+     * slice counted from the end, or for an earlier match; and the children that a filter tests,
+     * until the filter is decided. Values the caller requests with {@link Matcher#getValue()}, and
+     * the matches inside them, do not count. Implementations may count a node for longer than
+     * strictly needed, for example while a value inside it is still held, but never count a node of
+     * a held value less than once. The value is a non-negative integer. The default is 10,000,000.
+     * <p>A query of class {@link Buffering#NONE NONE} holds no such values, so this limit never
+     * applies to it, even with the value 0. Exceeding the limit throws {@link JsonException} from
+     * {@link Matcher#find()} or {@link Matcher#getValue()}. The limit does not apply to
+     * {@link #query query()}.</p>
+     *
+     * @see Json#createPath(String, java.util.Map)
+     * @since 2.2
+     */
+    String MAX_BUFFERED_NODES = "jakarta.json.JsonPath.maxBufferedNodes";
 
     /**
      * Configuration property to limit the nesting of filter selectors, parenthesized expressions
@@ -249,7 +275,8 @@ public interface JsonPath {
          * non-negative or omitted and a step that is omitted or at least -1. Name selectors,
          * wildcards, descendant segments and selector lists are allowed without restriction, for
          * example {@code $.store.book[*].title}, {@code $..id}, {@code $['a','b']}, {@code $[0,0]},
-         * {@code $[1:5:2]} and {@code $[::-1]}.
+         * {@code $[1:5:2]} and {@code $[::-1]}. {@link JsonPath#MAX_BUFFERED_NODES} never applies to
+         * these queries.
          */
         NONE,
 
@@ -268,7 +295,12 @@ public interface JsonPath {
          *     element {@code s} or the end of the array.</li>
          * </ul>
          * <p>The matcher holds the values of matches and of candidates that depend on such
-         * a decision, and nothing else.</p>
+         * a decision, and nothing else. How much that is depends on the document: a filter tests
+         * the children of the nodes it applies to, and a filter in a descendant segment, such as
+         * {@code $..[?@.price < 10]}, applies to the query argument itself, so it tests the
+         * children of the root, which may make up most of the document. A filter after a selection,
+         * such as {@code $..book[?@.price < 10]}, tests only the elements of the selected arrays.
+         * {@link JsonPath#MAX_BUFFERED_NODES} bounds what the matcher may hold.</p>
          */
         BOUNDED,
 
@@ -350,7 +382,11 @@ public interface JsonPath {
      * {@code {"a":{"b":1},"b":2}}, {@code query()} returns {@code $['b']} before {@code $['a']['b']},
      * the matcher reports {@code $['a']['b']} first; for {@code $['b','a']} on {@code {"a":1,"b":2}},
      * {@code query()} returns {@code $['b']} first, the matcher {@code $['a']}. RFC 9535 order can
-     * require buffering the whole document; callers that need it use {@code query()}.</p>
+     * require buffering the whole document; callers that need it use {@code query()}. The two orders
+     * are the same if the query has no descendant segment, every segment has a single selector, and
+     * no slice has a negative step, provided that the members of each object of the value passed to
+     * {@code query()} iterate in the order of the text, as they do for values that a JSON-P reader
+     * reads from that text.</p>
      *
      * <p><b>Values.</b> The matcher reads a match's value only if the caller calls
      * {@link #getValue()}. A value the caller does not request is skipped: when nothing inside it can
@@ -381,8 +417,8 @@ public interface JsonPath {
      *
      * <p><b>Errors.</b> {@link jakarta.json.stream.JsonParsingException} and
      * other exceptions of the parser pass through {@link #find()} and {@link #getValue()}. Exceeding
-     * a limit of the query (see {@link JsonPath#MAX_VISITED_NODES}, {@link JsonPath#MAX_DEPTH})
-     * throws {@link JsonException}. After an exception the matcher and the parser cannot be used
+     * a limit of the query (see {@link JsonPath#MAX_VISITED_NODES}, {@link JsonPath#MAX_DEPTH},
+     * {@link JsonPath#MAX_BUFFERED_NODES}) throws {@link JsonException}. After an exception the matcher and the parser cannot be used
      * further.</p>
      *
      * <p>A matcher is meant for use by one thread.</p>
