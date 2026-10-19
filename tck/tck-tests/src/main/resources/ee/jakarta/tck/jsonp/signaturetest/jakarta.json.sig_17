@@ -215,6 +215,7 @@ meth public abstract jakarta.json.JsonPatchBuilder test(java.lang.String,jakarta
 meth public abstract jakarta.json.JsonPatchBuilder test(java.lang.String,java.lang.String)
 
 CLSS public abstract interface jakarta.json.JsonPath
+fld public final static java.lang.String MAX_BUFFERED_NODES = "jakarta.json.JsonPath.maxBufferedNodes"
 fld public final static java.lang.String MAX_DEPTH = "jakarta.json.JsonPath.maxDepth"
 fld public final static java.lang.String MAX_NESTING = "jakarta.json.JsonPath.maxNesting"
 fld public final static java.lang.String MAX_REGEX_SIZE = "jakarta.json.JsonPath.maxRegexSize"
