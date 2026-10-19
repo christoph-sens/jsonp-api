@@ -1,0 +1,804 @@
+//
+// Copyright (c) 2026 Contributors to the Eclipse Foundation
+//
+
+:rfc9535: https://www.rfc-editor.org/rfc/rfc9535
+:rfc9485: https://www.rfc-editor.org/rfc/rfc9485
+:rfc6901: https://www.rfc-editor.org/rfc/rfc6901
+:rfc7493: https://www.rfc-editor.org/rfc/rfc7493
+:rfc8259: https://www.rfc-editor.org/rfc/rfc8259
+:cts: https://github.com/jsonpath-standard/jsonpath-compliance-test-suite
+
+[[jsonpath]]
+== JSONPath
+
+This chapter specifies the support for JSONPath queries, as defined by
+{rfc9535}[RFC 9535], that Jakarta JSON Processing provides since version 2.2. The types
+involved are `jakarta.json.JsonPath` with its nested types `JsonPath.Node`, `JsonPath.Matcher` and
+`JsonPath.Buffering`, and the methods `createPath` of `jakarta.json.Json` and
+`jakarta.json.spi.JsonProvider`. Their Javadoc specifies each method; this chapter states the rules
+that span several types, maps RFC 9535 onto the types of Jakarta JSON Processing, and explains the
+decisions behind them.
+
+[[jsonpath-overview]]
+=== Overview
+
+RFC 9535 defines a query language that selects nodes from a JSON value. Jakarta JSON Processing
+evaluates such queries in two layers:
+
+Tree layer:: `JsonPath.query(JsonValue)` applies a query to a value that is in memory and returns
+the selected nodes, each with its value and its location, in the order RFC 9535 defines.
+Streaming layer:: `JsonPath.matcher(JsonParser)` applies a query to the value that a `JsonParser`
+reads and reports the selected nodes one at a time, so that a large document is never
+materialized. The caller decides for each match whether to read its value.
+
+The tree layer is the reference semantics. The streaming layer is specified as reporting the nodes
+that the tree layer selects from the same value, which makes it testable against the tree layer.
+
+The API follows the shape of `JsonPointer`: a factory method on `Json` and on `JsonProvider`, an
+immutable interface in the package `jakarta.json`, and `JsonException` for errors.
+
+[source,java]
+----
+JsonPath path = Json.createPath("$.store.book[?@.price < 10].title");
+for (JsonPath.Node node : path.query(document)) {    // document: any JsonValue
+    JsonValue title = node.getValue();
+    String location = node.getPath();                // $['store']['book'][2]['title']
+    JsonPointer pointer = node.getPointer();         // /store/book/2/title
+}
+
+try (JsonParser parser = Json.createParser(input)) {
+    JsonPath.Matcher matcher = Json.createPath("$.orders[*].id").matcher(parser);
+    while (matcher.find()) {
+        String location = matcher.getPath();         // $['orders'][7]['id']
+        JsonValue id = matcher.getValue();           // or leave the value unread
+    }
+}
+----
+
+[[jsonpath-conventions]]
+=== Conventions and Terminology
+
+The key words "MUST", "MUST NOT", "SHOULD" and "MAY" in this chapter are to be interpreted as
+described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals. In this
+chapter they mark requirements that the TCK verifies (<<jsonpath-conformance>>). Statements without
+these key words describe the API as its Javadoc specifies it; they bind implementations in the same
+way, but the TCK does not check every one of them.
+
+The terms _query_, _query argument_, _node_, _nodelist_, _selector_, _segment_ and
+_Normalized Path_ have the meaning given in {rfc9535}#section-1.1[Section 1.1 of RFC 9535]. In
+addition:
+
+* A _JSONPath_ is an instance of `JsonPath`, created from a query string.
+* A _match_ is a node that a `JsonPath.Matcher` reports.
+* _Document order_ is the order in which values start in the JSON text that a parser reads.
+
+References of the form "RFC 9535, Section _n_" refer to {rfc9535}[RFC 9535].
+
+[[jsonpath-syntax]]
+=== Syntax
+
+The syntax of queries is the syntax of {rfc9535}#section-2[Section 2 of RFC 9535]; its grammar is
+collected in {rfc9535}#appendix-A[Appendix A of RFC 9535]. This specification neither repeats nor
+extends that grammar. There is no other dialect: syntax that RFC 9535 does not define, such as
+script expressions or `$.length`, is not supported.
+
+A query string has to be _well-formed_ and _valid_ (RFC 9535, Section 2.1): it conforms to the
+grammar, every integer in it that matters for the evaluation lies in the interval
+[-(2^53^)+1, (2^53^)-1] of {rfc7493}#section-2.2[I-JSON], and every use of a function is well-typed
+(RFC 9535, Section 2.4.3). `Json.createPath` and `JsonProvider.createPath` MUST throw `JsonException`
+for a query string that is not well-formed and valid. The check does not depend on any document,
+so all syntax errors are reported when the JSONPath is created and never by `query` or by a matcher.
+This includes leading or trailing whitespace, which the grammar does not allow, integers outside the
+I-JSON range in index and slice selectors, unknown function names and ill-typed function calls. The
+message of the exception gives the reason and the position in the query string.
+
+`createPath` also throws `JsonException` for a query that is nested deeper than the limit
+`MAX_NESTING` (<<jsonpath-limits>>), which is not a syntax error but is detected at the same time.
+A query string that is `null` causes a `NullPointerException`.
+
+The functions are the five functions of RFC 9535: `length()`, `count()`, `match()`, `search()` and
+`value()` (RFC 9535, Sections 2.4.4 to 2.4.8). A query that calls any other function is not valid.
+RFC 9535 lets implementations offer more functions through a registry (RFC 9535, Section 3.2); this
+version of the specification has no API for that (<<jsonpath-non-goals>>).
+
+`JsonPath.toString()` MUST return the query string exactly as it was passed to `createPath`,
+including insignificant whitespace.
+
+[[jsonpath-semantics]]
+=== Semantics on JSON Processing Values
+
+RFC 9535 defines the semantics of queries on JSON values. This section states how they apply to the
+types of Jakarta JSON Processing. The results of `query` MUST be the results RFC 9535 defines; the
+TCK checks this with the cases of the JSONPath Compliance Test Suite (<<jsonpath-conformance>>).
+
+[[jsonpath-values]]
+==== Query Argument and Kinds of Values
+
+The query argument is any `JsonValue`, including the primitive values: `$` applied to a
+`JsonString` selects that string (RFC 9535, Section 2.2.2). For a primitive query argument, the
+root node is the only node a query can select. The kind of a value is its `getValueType()`. The
+children of a `JsonObject` are the values of its members, the children of a `JsonArray` its
+elements.
+
+Implementations MUST evaluate queries on any implementation of `JsonObject`, including one
+provided by the application, and not only on objects the same provider created; the same holds for
+`JsonArray`.
+
+A valid query never fails because of the structure of the query argument. A name selector applied
+to an array, an index selector applied to an object, an index outside an array, a slice with step 0
+and a comparison of values of different kinds MUST NOT throw. They have the results RFC 9535
+defines: the selectors select nothing, and `<`, `<=`, `>` and `>=` are false for values of different
+kinds.
+
+[[jsonpath-numbers]]
+==== Numbers
+
+RFC 9535 requires mathematical equality and ordering for numbers that interoperate under I-JSON and
+allows an implementation-specific comparison for others (RFC 9535, Section 2.3.5.2.2). Jakarta JSON
+Processing defines one comparison for all numbers:
+
+* Numbers MUST be compared by the values of `JsonNumber.bigDecimalValue()` with
+  `BigDecimal.compareTo`. So `1`, `1.0`, `1e0` and `10e-1` are equal, `-0` equals `0`, and the
+  comparison is exact also beyond the range and precision of `double`.
+* Number literals in a query are read exactly, as `BigDecimal`, never through `double`.
+* `JsonNumber.equals` is not this comparison: it is `BigDecimal.equals`, which depends on the scale,
+  so that `1.0` is not equal to `1`. The same holds for `JsonArray.equals` and `JsonObject.equals`.
+  In comparisons of a filter, arrays and objects MUST be equal if their elements or members are
+  equal in the sense of this section.
+
+A `JsonNumber` cannot hold NaN or an infinity, so non-finite numbers do not occur.
+
+[[jsonpath-strings]]
+==== Strings and Member Names
+
+* Strings MUST be compared by Unicode code points (RFC 9535, Section 2.3.5.2.2). This is not
+  `String.compareTo`, which compares UTF-16 code units and therefore orders U+E000 to U+FFFF after
+  the supplementary characters.
+* A name selector MUST select a member only if the member name and the name in the query are
+  identical sequences of code points (RFC 9535, Section 2.3.1.2). No Unicode normalization is
+  applied.
+* `length()` of a string MUST be the number of its code points (RFC 9535, Section 2.4.4), not
+  `String.length()`.
+
+A Java string can contain unpaired surrogates, which are not Unicode scalar values. RFC 9535 does
+not define the behavior for such strings (RFC 9535, Section 1.3). For Jakarta JSON Processing the
+result of comparisons, name selection, `length()` and regular expressions on such strings is
+implementation specific, and so is their representation in a Normalized Path, whose grammar cannot
+express them. The TCK does not test them.
+
+[[jsonpath-null]]
+==== JSON null
+
+JSON `null` is a value like any other (RFC 9535, Section 2.6). `$.a` applied to `{"a": null}` MUST
+select one node whose value is `JsonValue.NULL`; applied to `{}` it MUST select nothing. Existence
+tests and comparisons with `null` in filters distinguish the two cases: `[?@.a]` and
+`[?@.a == null]` are true for the first object and false for the second. The API never uses Java
+`null` for JSON `null`.
+
+[[jsonpath-duplicate-names]]
+==== Duplicate Member Names
+
+A `JsonObject` is a `Map<String, JsonValue>` and cannot contain duplicate names. Whether a JSON text
+with duplicate names becomes an object with the first value, with the last value, or an error is
+decided by the reader (for example with `JsonConfig.KEY_STRATEGY`) before a query runs. The tree
+layer therefore never sees duplicate names; RFC 9535 does not define the behavior for them either
+(RFC 9535, Section 1.3).
+
+The streaming layer reads the event stream of a parser, which can contain a name more than once in
+an object. Each occurrence is a node of its own for a matcher (<<jsonpath-matches>>).
+
+[[jsonpath-nodes]]
+==== Nodes and Repeated Selection
+
+A node is a value together with its location in the query argument (RFC 9535, Section 1.1). Two
+nodes are the same node if and only if they have the same Normalized Path. Equal values at
+different locations are different nodes. `JsonPath.Node` does not define `equals`; callers compare
+`getPath()`.
+
+A node that a query selects more than once MUST appear that many times in the result of `query`,
+each time with the same Normalized Path: `$[0,0]` applied to `[1]` returns two nodes with the path
+`$[0]` (RFC 9535, Section 2.1.2). Implementations do not remove duplicates.
+
+`Node.getValue()` returns the value as the parent's `JsonObject.get` or `JsonArray.get` returns it,
+and the query argument itself for the root node; the TCK checks that the values are equal. It is
+never `null`. The specification does not promise object identity, because the query argument may
+be an implementation that creates values on access.
+
+[[jsonpath-normalized-paths]]
+==== Normalized Paths
+
+`Node.getPath()` MUST return the Normalized Path of the node as defined in
+{rfc9535}#section-2.7[Section 2.7 of RFC 9535]: `$` followed by member names in single quotes and
+array indices in brackets, for example `$['store']['book'][0]`. Member names use the escapes of that
+grammar, `\'`, `\\`, `\b`, `\f`, `\n`, `\r`, `\t` and `\u00xx` with lower-case hexadecimal digits for the
+other characters from U+0000 to U+001F, and every other character unescaped. Array indices are non-negative decimal integers,
+also when the query selected the element with a negative index or slice. Each node of a query
+argument has exactly one Normalized Path.
+
+[[jsonpath-pointer]]
+==== JSON Pointer
+
+`Node.getPointer()` MUST return the {rfc6901}[JSON Pointer] of the same location: each member name
+with `~` escaped as `~0` and `/` as `~1`, each array index in decimal, and the empty pointer for the
+root node. Applied to the query argument, this pointer, and a pointer created from its string with
+`Json.createPointer`, MUST reference the value of the node.
+
+The pointer is the bridge from queries to modification. `JsonPath` itself does not change
+documents; a caller replaces or removes the selected values with `JsonPointer` or `JsonPatch`.
+`JsonPointer.getValue` takes a `JsonStructure`; for a primitive query argument the root node is the
+only node, and its pointer is the empty pointer.
+
+[[jsonpath-order]]
+==== Order of Results
+
+The result of `query` MUST be in the order of the nodelist RFC 9535 defines. Array elements are in
+array order. For the members of an object, RFC 9535 does not stipulate an order (RFC 9535, Sections
+2.3.2.2, 2.3.5.2 and 2.5.2.2); Jakarta JSON Processing requires the iteration order of the object's
+`entrySet()`. This holds for objects from a reader, from a builder and for objects the application
+provides. For the objects a JSON Processing reader creates, it is the order of the members in the
+text, so results are the same across runs and across providers.
+
+[[jsonpath-regex]]
+=== Regular Expressions
+
+`match()` and `search()` use I-Regexp as defined by {rfc9485}[RFC 9485] (RFC 9535, Sections 2.4.6
+and 2.4.7). `match()` tests whether the whole string matches, `search()` whether a substring
+matches. Implementations MUST implement I-Regexp:
+
+* The syntax is that of {rfc9485}#section-3[Section 3 of RFC 9485]; the semantics are those of XSD
+  regular expressions ({rfc9485}#section-4[Section 4 of RFC 9485]). For example, `.` MUST NOT match
+  the line terminators `\n` and `\r`.
+* A pattern that is not an I-Regexp MUST make the function return false; it MUST NOT throw. This
+  applies to patterns of other dialects, such as `\d` or `(?i)` of `java.util.regex`, and to
+  patterns over the size limit `MAX_REGEX_SIZE` (<<jsonpath-limits>>), which RFC 9485, Section 8,
+  allows implementations to set.
+* Matching MUST take time linear in the length of the string, for a given pattern.
+
+`java.util.regex` is not an implementation of I-Regexp. Its syntax differs from that of RFC 9485,
+and it backtracks, so a crafted pattern takes exponential time. Patterns do not only come from the
+query: in `match(@.code, @.pattern)` the pattern is read from the document, so a trusted query can
+meet a hostile pattern. The TCK applies such patterns, from the query and from the document, to
+long strings.
+
+[[jsonpath-regex-anchors]]
+==== `^` and `$`
+
+NOTE: This is an open point of this specification (<<jsonpath-open-issues>>).
+
+The grammar of RFC 9485 has no anchors: `^` and `$` outside a character class are ordinary
+characters (`NormalChar` in Section 3 of RFC 9485). The JSONPath Compliance Test Suite treats them as
+anchors: its cases "functions, match, explicit caret" (`$[?match(@, '^ab.*')]`) and "functions,
+match, explicit dollar" (`$[?match(@, '.*bc$')]`) expect `^` to match only at the start of the
+string and `$` only at its end. The difference is reported to the test suite as
+{cts}/issues/122[jsonpath-compliance-test-suite#122].
+
+The TCK takes its conformance cases from the test suite (<<jsonpath-conformance>>), so at present it
+requires the anchor interpretation for these two cases: `^` outside a character class matches the
+start of the string and `$` outside a character class matches its end, in `match()` and `search()`.
+Inside a character class, `^` keeps the meaning RFC 9485 gives it. When the test suite resolves the
+issue, this specification and the TCK follow its resolution.
+
+[[jsonpath-api]]
+=== API
+
+[[jsonpath-api-create]]
+==== Creating a JSONPath
+
+`Json.createPath(String)` delegates to `JsonProvider.provider().createPath(String)`, and
+`Json.createPath(String, Map<String, ?>)` to `JsonProvider.provider().createPath(String, Map)`.
+The second method takes the configuration properties of <<jsonpath-limits>>, as
+`createReaderFactory(Map)` takes the properties of readers. The map may also contain properties
+specific to a provider. A property the provider does not support MUST be ignored; a property that is
+not in the map has its default. `createPath(String)` uses the defaults.
+
+Both methods of `JsonProvider` have a default implementation that throws
+`UnsupportedOperationException`, so that providers written for earlier versions keep compiling and
+linking. A provider that implements this version of the specification overrides both
+(<<jsonpath-conformance>>).
+
+A `null` query string or a `null` map MUST cause a `NullPointerException`; an invalid query MUST
+cause a `JsonException` (<<jsonpath-syntax>>).
+
+[[jsonpath-api-jsonpath]]
+==== `JsonPath`
+
+A `JsonPath` is immutable. Instances MUST be safe for use by multiple concurrent threads: one
+instance can be applied to any number of query arguments, in sequence or at the same time, and
+returns the same result for the same argument. The limits of the configuration are part of the
+instance and apply to each of its evaluations.
+
+`query(JsonValue)` applies the query to its argument and returns the selected nodes
+(<<jsonpath-semantics>>). The list MUST be unmodifiable, also when it is empty: `add`, `set`,
+`remove`, `clear` and `Iterator.remove` throw `UnsupportedOperationException`. The results of
+different calls are independent of each other. A `null` argument MUST cause a
+`NullPointerException`.
+
+`getBuffering()` and `matcher(JsonParser)` belong to the streaming layer
+(<<jsonpath-streaming>>). They are abstract methods: `JsonPath` is new in this version, so there is
+no implementation that a default method would keep compatible, and an implementation that does not
+support streaming is not an implementation of this version.
+
+[[jsonpath-api-node]]
+==== `JsonPath.Node`
+
+A node of the result has three methods: `getValue()` (<<jsonpath-nodes>>), `getPath()`
+(<<jsonpath-normalized-paths>>) and `getPointer()` (<<jsonpath-pointer>>).
+
+[[jsonpath-api-errors]]
+==== Errors
+
+[cols="3,2,3",options="header"]
+|===
+| Situation | Exception | Thrown by
+
+| Query string or configuration map is `null`; `query(null)`; `matcher(null)`
+| `NullPointerException`
+| `createPath`, `query`, `matcher`
+
+| Query is not well-formed or not valid (<<jsonpath-syntax>>), or nested deeper than `MAX_NESTING`
+| `JsonException`
+| `createPath`
+
+| A configuration property defined in `JsonPath` has a value that is not valid
+| `JsonException`
+| `createPath`
+
+| An evaluation exceeds a limit (<<jsonpath-limits>>)
+| `JsonException`
+| `query`, `Matcher.find()`, `Matcher.getValue()`
+
+| `matcher()` for a query of class `UNBOUNDED`
+| `JsonException`
+| `matcher`
+
+| The parser's next event does not start a JSON value
+| `IllegalStateException`
+| first `Matcher.find()`
+
+| A method describing the current match is called before the first match or after the last
+| `IllegalStateException`
+| `Matcher.getPath()`, `getPointer()`, `getLocation()`, `getValue()`
+
+| The JSON text the parser reads is not valid
+| `JsonParsingException`, from the parser
+| `Matcher.find()`, `Matcher.getValue()`
+
+| The provider does not support JSONPath
+| `UnsupportedOperationException`
+| `createPath`
+|===
+
+The rules follow RFC 9535, Section 2.1. Errors in the query are independent of any document and are
+raised when the JSONPath is created. An implementation that cannot evaluate a valid query correctly,
+because of a limit or because of the resources it would need, does not silently return a partial or
+wrong result: it throws `JsonException` (<<jsonpath-limits>>).
+
+[[jsonpath-streaming]]
+=== Streaming Evaluation over `JsonParser`
+
+[[jsonpath-streaming-model]]
+==== Model
+
+`JsonPath.matcher(JsonParser)` returns a `JsonPath.Matcher` that evaluates the query over the JSON
+value the parser reads next, the query argument of the matcher. The parser is positioned before that
+value: it is newly created, its current event is `KEY_NAME`, or it is before an element of an array.
+`matcher()` reads nothing from the parser. The caller pulls matches:
+
+* `find()` advances to the next match and returns `false` when the query argument has been read to
+  its end and all its matches have been reported.
+* `getPath()` and `getPointer()` return the location of the current match, relative to the query
+  argument, as `Node.getPath()` and `Node.getPointer()` do.
+* `getLocation()` returns the location of the current match in the JSON text: the value that
+  `JsonParser.getLocation()` returned when the current event of the parser was the first event of
+  the match's value.
+* `getValue()` returns the value of the current match, reading it from the parser if the matcher has
+  not read it yet. Repeated calls for the same match return equal values.
+
+The values go through the matcher, not through the parser. That way the same calls work for every
+query, including matches the matcher had to buffer; the matcher knows which values the caller took
+without relying on `JsonParser.currentEvent()`; and taking a value never changes which nodes are
+reported. A matcher is meant for use by one thread.
+
+[[jsonpath-matches]]
+==== Matches
+
+For a query argument without duplicate member names, the matches MUST be the nodes that
+`query(parser.getValue())` selects from the same value, each reported as many times as `query`
+selects it. Where the parser delivers a member name more than once in an object, each occurrence is a
+node of its own (<<jsonpath-duplicate-names>>); the matcher reports what the parser delivers and does
+not buffer to detect duplicates. Applications that must reject duplicate names configure the parser
+to do so.
+
+A node that is selected several times, for example by `$[0,0]` or `$..*..*`, MUST be reported that
+many times in a row. Taking the value of a match MUST NOT hide the matches inside it: for `$..a` on
+`{"a": {"a": 1}}`, after the caller took the outer value, the inner match is reported next, with a
+value equal to the corresponding part of the outer value.
+
+[[jsonpath-streaming-order]]
+==== Order
+
+A matcher MUST report matches in document order: a node before the nodes inside its value, and nodes
+in different values in the order in which their values start in the JSON text. This is not the order
+of `query`, which follows RFC 9535. Both report the same nodes the same number of times; the order
+differs when a segment selects children out of document order or when a descendant segment meets
+nested matches:
+
+* `$..b` on `{"a": {"b": 1}, "b": 2}`: `query` returns `$['b']` before `$['a']['b']`, because the
+  descendant segment applies `b` to the root before it visits `a`. The matcher reports `$['a']['b']`
+  first.
+* `$['b','a']` on `{"a": 1, "b": 2}`: `query` returns `$['b']` first, in the order of the selectors;
+  the matcher reports `$['a']` first.
+* `$..[1]` on `[[7, 8], 9]`: `query` returns `$[1]` (9) before `$[0][1]` (8); the matcher reports 8
+  first.
+
+The two orders MUST be the same if the query has no descendant segment, every segment has a single
+selector, and no slice has a negative step, provided that the members of each object in the value
+passed to `query` iterate in the order of the text, as they do for values a JSON Processing reader
+reads from that text. Then every match lies at the same depth and every segment selects children in
+document order.
+
+Document order is the order of the specification because the order of RFC 9535 can require
+buffering the whole document: `$..id` must report the `id` of the root, which may be the last member
+of the text, before every `id` inside it. With document order, descendant segments and selector
+lists need no buffering, and one rule, "the matcher reports what it reads in the order it reads it",
+is easy to state, to implement alike and to test. Queries whose order is their point, such as
+`$[::-1]` or `$['name','id']`, are a case for `query`. Callers that need the order of RFC 9535 use
+`query(parser.getValue())`.
+
+[[jsonpath-streaming-values]]
+==== Values and Parser State
+
+The matcher reads the value of a match only if the caller calls `getValue()`. A value the caller
+does not request is skipped: when nothing inside it can be selected, with `JsonParser.skipObject()`
+or `JsonParser.skipArray()`; otherwise the matcher reads on through the value to the matches inside
+it.
+
+The matcher advances the parser. Between calls of the matcher, the caller may call only the methods
+of the parser that do not change its state: `currentEvent()`, `getString()`, `isIntegralNumber()`,
+`getInt()`, `getLong()`, `getBigDecimal()` and `getLocation()`. A scalar match can thus be read
+without creating a `JsonValue`. The effect of any other call, such as `next()`, `getValue()`,
+`skipObject()` or `close()`, is not specified.
+
+[cols="2,3",options="header"]
+|===
+| When | Current event of the parser
+
+| `matcher()` returns
+| Unchanged; nothing has been read.
+
+| `find()` returns `true`, query of class `NONE`
+| The first event of the match's value (`START_OBJECT`, `START_ARRAY` or a `VALUE_` event), unless
+the match lies inside a value the caller requested before, or is the same node as the previous match
+and the caller requested its value.
+
+| `find()` returns `true`, other queries
+| The first event of the match's value, or an event after the end of the value.
+
+| `getValue()` has read the value from the parser
+| The last event of the value, as after `JsonParser.getValue()`.
+
+| `find()` returns `false`
+| The last event of the query argument. The parser has read nothing beyond it.
+|===
+
+The rows for `matcher()`, for class `NONE` and for `find()` returning `false` are requirements the
+TCK checks: implementations MUST leave the parser in these states. Because a matcher never reads
+beyond its query argument and never closes the parser, a caller can apply a query to the value of
+one member and continue with the next member.
+
+[[jsonpath-buffering]]
+==== Buffering Classes
+
+How much a matcher must buffer is a property of the query alone, returned by
+`JsonPath.getBuffering()` as a value of `JsonPath.Buffering`. The class follows from the syntax of
+the query by the rules below, so all implementations agree on it; `getBuffering()` MUST return the
+class these rules give. The rules look at the segments of the query. Queries inside filter
+selectors are evaluated on buffered values and matter only for `UNBOUNDED`, through absolute
+queries.
+
+The question behind the rules is whether a selector can decide that it selects a child at the
+moment the parser reaches the child. Names, wildcards, non-negative indices and slices counted from
+the start of an array can. A filter needs the child's value. An index or slice counted from the end
+needs the length of the array.
+
+`NONE`:: No buffering. The query contains no filter selector, every index selector is non-negative,
+and every slice selector has a start and an end that are non-negative or omitted and a step that is
+omitted or at least -1. Name selectors, wildcards, descendant segments and selector lists are not
+restricted: `$.store.book[*].title`, `$..id`, `$['a','b']`, `$[0,0]`, `$[1:5:2]` and `$[::-1]` are
+in this class. The matcher holds no values of the query argument except those the caller requests.
+A step of -1 qualifies, because `[5:1:-1]` selects those of the indices 2 to 5 that exist, which is
+known for each index on its own.
+
+`BOUNDED`:: Buffering bounded by the query and by the size of the values it tests, independent of the
+size of the rest of the document. A query is in this class if it is in neither of the other classes,
+that is, if it contains
++
+--
+* a filter selector without an absolute query, such as `$.items[?@.price < 10]`: the matcher may hold
+  each child the filter tests until the filter is decided;
+* a negative index `-n`, or a slice with a start or end `-n`: the matcher may hold the last `n`
+  elements of an array until the array ends;
+* a slice with a step less than -1 and a non-negative start `s`, such as `$[5:1:-2]`: the matcher may
+  hold `s + 1` elements, until it reaches element `s` or the end of the array.
+--
++
+The matcher holds the values of matches and of candidates that depend on such a decision, and
+nothing else; a match that comes after an undecided one in document order waits for it. These values
+can be large. A filter tests the children of the nodes it applies to, and a filter in a descendant
+segment, such as `$..[?@.price < 10]`, applies to the query argument itself, so it tests the children
+of the root, which may make up most of the document. A filter after a selection, such as
+`$..book[?@.price < 10]`, tests only the elements of the selected arrays. `MAX_BUFFERED_NODES`
+bounds what the matcher holds (<<jsonpath-limits>>). Implementations may hold less than a whole
+tested child, as long as the results are the same.
+
+`UNBOUNDED`:: The query may need the whole document. A query is in this class if
++
+--
+* a filter selector contains an absolute query at any depth, such as `$.items[?@.price < $.limit]`:
+  the filter cannot be decided before `$.limit` is read, which may be the last member of the
+  document; or
+* a slice in one of its segments has a step less than -1, a start that is negative or omitted, and an
+  end that is non-negative or omitted, such as `$[::-2]`: which elements it selects depends on the
+  length of the array, so every element is a candidate until the array ends.
+--
+
+`matcher()` MUST reject a query of class `UNBOUNDED` with `JsonException`, without reading from the
+parser. Materializing the document would defeat the purpose of the method; a caller who accepts the
+memory evaluates `query(parser.getValue())`.
+
+[[jsonpath-streaming-limits]]
+==== Limits and Errors
+
+The limits `MAX_VISITED_NODES`, `MAX_DEPTH` and `MAX_BUFFERED_NODES` apply to each matcher; every
+value the matcher reads counts as a visit, plus the visits of filters on buffered candidates.
+`MAX_RESULT_SIZE` does not apply, because a matcher collects nothing. A matcher considers every
+element of an array as a candidate of an index or slice counted from the end, while `query` computes
+the selected indices, so for the same query and document a matcher may exceed `MAX_DEPTH` where
+`query` does not.
+
+`find()` MUST throw `IllegalStateException` if the first event the parser returns does not start a
+JSON value, for example `END_ARRAY`. `getPath()`, `getPointer()`, `getLocation()` and `getValue()`
+MUST throw `IllegalStateException` before the first match and after `find()` returned `false`.
+`JsonParsingException` and the other exceptions of the parser pass through `find()` and
+`getValue()`. After an exception, neither the matcher nor the parser can be used further.
+
+[[jsonpath-limits]]
+=== Limits for Untrusted Queries and Documents
+
+RFC 9535, Section 4.1, asks implementations to defend against queries and documents crafted to
+exhaust resources, such as nested descendant segments, deep documents and expensive regular
+expressions. Jakarta JSON Processing defines limits for this as configuration properties of
+`Json.createPath(String, Map<String, ?>)`. A query that exceeds a limit MUST fail with `JsonException`
+and MUST NOT return a partial result.
+
+[cols="3,2,4,2",options="header"]
+|===
+| Property (constant of `JsonPath`) | Applies to | Bounds | Default
+
+| `jakarta.json.JsonPath.maxNesting` (`MAX_NESTING`)
+| `createPath`
+| The nesting of filter selectors, parenthesized expressions and function calls in the query
+| 64
+
+| `jakarta.json.JsonPath.maxRegexSize` (`MAX_REGEX_SIZE`)
+| `match()`, `search()`, for literals in the query and for patterns from the document
+| The size of a regular expression after counted repetitions are expanded
+| Implementation specific
+
+| `jakarta.json.JsonPath.maxVisitedNodes` (`MAX_VISITED_NODES`)
+| `query`, `Matcher.find()`
+| The number of times an evaluation reaches a node
+| 100,000,000
+
+| `jakarta.json.JsonPath.maxDepth` (`MAX_DEPTH`)
+| `query`, `Matcher.find()`
+| The depth of the nodes an evaluation reaches, and of comparisons
+| 1,000
+
+| `jakarta.json.JsonPath.maxResultSize` (`MAX_RESULT_SIZE`)
+| `query`
+| The number of nodes in the result
+| Not limited
+
+| `jakarta.json.JsonPath.maxBufferedNodes` (`MAX_BUFFERED_NODES`)
+| `Matcher.find()`, `Matcher.getValue()`
+| The number of nodes a matcher holds because it cannot report or decide them yet
+| 10,000,000
+|===
+
+The value of each of these properties is a non-negative integer, given as a `Number` or as a
+`String` in decimal notation. Any other value, such as a negative number, a number with a fraction,
+another string or an object of another type, MUST make `createPath` throw `JsonException`. A limit is
+part of the `JsonPath` and applies to each of its evaluations. Providers may offer their own way to
+change the defaults, for example system properties.
+
+The defaults are part of the specification where the measure is portable, so that the same query on
+the same document behaves alike across providers. The TCK checks the defaults of `MAX_NESTING`,
+`MAX_DEPTH` and `MAX_RESULT_SIZE`.
+
+[[jsonpath-limit-nesting]]
+==== Nesting
+
+`MAX_NESTING` bounds the recursion of the query parser. Each filter selector, each parenthesized
+expression and each function call adds one level: `$[?@.a]` has nesting 1, `$[?(@.a)]` nesting 2
+(a filter and a parenthesized expression inside it), `$[?@[?length(@) > 1]]` nesting 3. A query
+nested deeper than the limit MUST make `createPath` throw `JsonException`. With the default, a query
+of 64 nested filters MUST be accepted and one of 65 rejected.
+
+[[jsonpath-limit-regex]]
+==== Size of Regular Expressions
+
+`MAX_REGEX_SIZE` bounds the size of a regular expression of `match()` and `search()` after counted
+repetitions are expanded, so that `(a{1000}){1000}` cannot exhaust memory. A larger expression MUST
+be treated as an invalid pattern, so the function returns false (<<jsonpath-regex>>); this applies
+to literals in the query and to patterns from the document.
+
+The unit of the size is chosen by the implementation. It grows at least linearly with the number of
+characters and character classes of the expanded expression; implementations document the unit and
+the default. With the limit 0, a pattern that contains a character MUST be treated as invalid; with
+the limit 1,000, `ab` MUST be valid and `a{100000}` MUST be treated as invalid. A portable unit
+would have to count every construct that makes an automaton grow (`(|){100000}` contains no
+character but expands to a large automaton), which would tie the specification to one compilation
+scheme. Matching takes linear time independent of this limit.
+
+[[jsonpath-limit-visited]]
+==== Visited Nodes
+
+`MAX_VISITED_NODES` bounds the time of one evaluation by counting work, not by measuring time. An
+evaluation visits a node each time a selector selects it, a descendant segment walks through it or a
+filter tests it, also within queries inside filters; a matcher also visits each value it reads from
+the parser. Implementations may avoid work that cannot change the result, for example evaluate an
+absolute query inside a filter only once, so the exact count is implementation specific. It MUST
+never be less than the number of selected nodes, so a limit below the size of the result MUST make
+`query` and `Matcher.find()` throw `JsonException`.
+
+[[jsonpath-limit-depth]]
+==== Depth
+
+The query argument has depth 0, its children depth 1. An evaluation _reaches_ a node when a selector
+selects or tests it or a descendant segment walks through it, also within queries inside filters.
+Reaching a node deeper than `MAX_DEPTH` MUST throw `JsonException` from `query` or `Matcher.find()`,
+whichever selector reaches it: names, indices, slices, wildcards, filters and descendant segments
+alike. A node that is not reached does not count: an empty array or object at the limit does not
+throw, because no node below it is reached, and neither does a name that selects nothing.
+Comparisons with `==` and `!=` count the depth from the compared values and throw when they would
+compare values nested deeper than the limit.
+
+With the default, `$..*` MUST walk to depth 1,000 and MUST throw for a document nested 1,001 levels
+deep. Independent of the configured limits, a document nested 100,000 levels deep and a query with
+10,000 nested parentheses or negations MUST either be evaluated correctly or fail with
+`JsonException`; a `StackOverflowError` is a defect (RFC 9535, Section 4.1).
+
+[[jsonpath-limit-result]]
+==== Result Size
+
+`MAX_RESULT_SIZE` bounds the memory of results such as that of `$..*`. A result larger than the limit
+MUST make `query` throw `JsonException`; a result of the limit's size MUST NOT. The limit does not
+apply to a matcher. By default the size of the result is not limited.
+
+[[jsonpath-limit-buffered]]
+==== Buffered Nodes
+
+"Bounded" in the class `BOUNDED` means bounded by the query and by the tested values, and both can
+be large. An untrusted query `$[-9007199254740991]` makes every element of an array a candidate until
+the array ends, and `$..[?@.price < 10]` tests the children of the root. Without a limit, a caller
+who streams to avoid materialization could not rule out materialization.
+
+`MAX_BUFFERED_NODES` counts the nodes in the values a matcher holds at one time because it cannot
+report or decide them when the parser reaches them: matches that wait for the decision of a filter,
+of an index or slice counted from the end, or for an earlier match, and the children a filter tests
+until the filter is decided. Values the caller requests with `getValue()`, and the matches inside
+them, do not count. The measure is nodes, not values, because one held value can be the whole
+document. Implementations may count a node for longer than strictly needed, for example while a
+value inside it is still held, but never count a node of a held value less than once. Exceeding the
+limit MUST throw `JsonException` from `find()` or `getValue()`.
+
+A query of class `NONE` holds no such values, so this limit MUST NOT apply to it, even with the value
+0 and even when the caller requests every value. This makes the guarantee of the class `NONE`
+observable. The limit does not apply to `query`. The default, 10,000,000 nodes, bounds memory to the
+order of a gigabyte: queries that stream one record at a time never reach it, queries that
+effectively materialize a large document do.
+
+[[jsonpath-conformance]]
+=== Conformance
+
+A compatible implementation of this specification supports JSONPath: its provider implements both
+`createPath` methods, and its `JsonPath`, `JsonPath.Node` and `JsonPath.Matcher` implement this
+chapter. It MUST pass the JSONPath tests of the TCK; a certification run of the TCK excludes none of
+them.
+
+[[jsonpath-tck]]
+==== TCK
+
+The JSONPath tests of the TCK are in the package `ee.jakarta.tck.jsonp.api.jsonpathtests`. All of
+them carry the JUnit tag `jsonpath`; the streaming tests also carry `jsonpath-streaming`, the
+configuration tests `jsonpath-config`.
+
+[cols="2,5",options="header"]
+|===
+| Test class | Covers
+
+| `JsonPathTests`
+| Creation and syntax errors (<<jsonpath-syntax>>), the semantics on JSON Processing values
+(<<jsonpath-semantics>>), Normalized Paths and JSON Pointers, unmodifiable results, regular
+expressions including linear time (<<jsonpath-regex>>), concurrent use, deep documents and deep
+queries.
+
+| `JsonPathComplianceTests`
+| One test per case of the JSONPath Compliance Test Suite (<<jsonpath-cts>>), with values and
+Normalized Paths in order, and the JSON Pointer of every node.
+
+| `JsonPathStreamingTests`
+| Buffering classes (<<jsonpath-buffering>>); the matcher over every valid case of the test suite and
+over a grid of index and slice selectors on arrays of length 0 to 9, taking no values, all values
+and every other value; order (<<jsonpath-streaming-order>>); parser state, repeated and nested
+matches, errors, and buffering that does not depend on the size of the rest of the document.
+
+| `JsonPathConfigTests`
+| The configuration map and its values, and each limit of <<jsonpath-limits>>.
+|===
+
+The streaming tests compare a matcher with `query` on the same JSON text: the Normalized Paths and
+JSON Pointers of the matches equal those of `query`, sorted stably into document order; the values
+the caller takes equal the values of `query`; each location equals the location a plain parser of the
+text reports at the first event of the value; after the last match the parser has read the whole
+text.
+
+[[jsonpath-cts]]
+==== JSONPath Compliance Test Suite
+
+The {cts}[JSONPath Compliance Test Suite] (CTS) is the test suite of the JSONPath community for RFC
+9535. The TCK contains a copy of its `cts.json` at a fixed commit, recorded together with its
+SHA-256 checksum in the TCK; the copy is third-party content under the BSD-2-Clause license. A case
+with `invalid_selector` passes if `createPath` throws `JsonException`. Any other case passes if
+`query` returns the expected values, numbers compared as in <<jsonpath-numbers>>, and the expected
+Normalized Paths, in order. Where RFC 9535 does not stipulate the order of object members, the CTS
+lists several allowed results, and a case passes if the result is one of them.
+
+The TCK is updated to a newer commit of the CTS by replacing the copy and its recorded commit and
+checksum. Changes of the CTS that affect this specification, such as the resolution of
+<<jsonpath-regex-anchors>>, enter the TCK this way.
+
+[[jsonpath-non-goals]]
+=== Non-Goals
+
+The following are not part of this version of the specification. Each can be added later without
+changing what this chapter specifies.
+
+* An API to register function extensions (RFC 9535, Section 2.4). Only the five functions of RFC 9535
+  are supported.
+* Modification through queries. Callers combine `Node.getPointer()` with `JsonPointer` or
+  `JsonPatch` (<<jsonpath-pointer>>).
+* Dialects other than RFC 9535, such as the syntax of earlier JSONPath libraries.
+* Results without locations, as an optimization for callers that only need values.
+* Integration with Jakarta JSON Binding.
+
+[[jsonpath-open-issues]]
+=== Open Issues
+
+* `^` and `$` in regular expressions: anchors, as the CTS expects, or ordinary characters, as the
+  grammar of RFC 9485 has them (<<jsonpath-regex-anchors>>,
+  {cts}/issues/122[jsonpath-compliance-test-suite#122]). This specification follows the CTS.
+* Order of object members: this specification requires the iteration order of `entrySet()`
+  (<<jsonpath-order>>); RFC 9535 leaves it unspecified. Requiring it makes results deterministic
+  across providers.
+* Exception type: `JsonException`, as for `createPointer`, or a new subclass with the position of
+  a syntax error from the start. A subclass of `JsonException` can also be added later without
+  breaking callers.
+* Equality of nodes: `JsonPath.Node` does not define `equals` (<<jsonpath-nodes>>); an alternative is
+  equality of path and value.
+
+[[jsonpath-references]]
+=== References
+
+* {rfc9535}[RFC 9535] JSONPath: Query Expressions for JSON. S. Gössner, G. Normington, C. Bormann,
+  February 2024.
+* {rfc9485}[RFC 9485] I-Regexp: An Interoperable Regular Expression Format. C. Bormann, T. Bray,
+  October 2023.
+* {rfc6901}[RFC 6901] JavaScript Object Notation (JSON) Pointer. P. Bryan, K. Zyp, M. Nottingham,
+  April 2013.
+* {rfc7493}[RFC 7493] The I-JSON Message Format. T. Bray, March 2015.
+* {rfc8259}[RFC 8259] The JavaScript Object Notation (JSON) Data Interchange Format. T. Bray,
+  December 2017.
+* {cts}[JSONPath Compliance Test Suite].

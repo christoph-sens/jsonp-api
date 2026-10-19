@@ -349,6 +349,8 @@ public final class Json {
      * sources. The map contains the configuration properties defined in {@link JsonPath}, such as
      * {@link JsonPath#MAX_VISITED_NODES}, and may contain provider specific properties. Properties
      * the provider does not support are ignored; a limit that is not in the map has its default.
+     * The value of each property defined in {@link JsonPath} is a non-negative integer, given as a
+     * {@link Number} or as a {@link String} in decimal notation; any other value is not valid.
      *
      * @param query the JSONPath query string
      * @param config a map of configuration properties, possibly empty
