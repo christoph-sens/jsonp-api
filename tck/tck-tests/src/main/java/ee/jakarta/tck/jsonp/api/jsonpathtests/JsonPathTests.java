@@ -59,7 +59,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * API tests.<br>
  * JSON-P API defines {@link jakarta.json.JsonPath} to evaluate RFC 9535 queries on
  * {@link JsonValue}s. These tests check the contract of {@link Json#createPath(String)},
- * {@link JsonPath} and {@link JsonPath.Node}.
+ * {@link JsonPath} and {@link JsonPath.Node}; {@link JsonPathComplianceTests} checks
+ * query results against the JSONPath Compliance Test Suite.
  */
 @Tag(JsonPathUtil.TAG)
 public class JsonPathTests {

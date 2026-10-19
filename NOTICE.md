@@ -76,6 +76,15 @@ JUnit (4.12)
 
 * License: Eclipse Public License
 
+JSONPath Compliance Test Suite (commit 20ebdcce5008c8a777ee9c80ad853ecf606950b5)
+
+* License: BSD-2-Clause
+* Project: https://github.com/jsonpath-standard/jsonpath-compliance-test-suite
+* Source:
+   https://github.com/jsonpath-standard/jsonpath-compliance-test-suite/tree/20ebdcce5008c8a777ee9c80ad853ecf606950b5
+* Used as test data of the TCK:
+   tck/tck-tests/src/main/resources/ee/jakarta/tck/jsonp/api/jsonpathtests/cts
+
 ## Cryptography
 
 Content may contain encryption software. The country in which you are currently
