@@ -1,9 +1,16 @@
 # Differential tests: Parsson vs. Johnzon vs. Treetrail
 
-Generated documents and queries are run through three independent implementations of RFC 9535 and every
-disagreement is recorded: the Parsson fork and the Johnzon fork (both implement the proposed `jakarta.json.JsonPath`
-API, written separately) and Treetrail 1.0.0 (`jsonpath-core` + `jsonpath-jsonp`, an unrelated library that passes the
-JSONPath Compliance Test Suite and works on the same `JsonValue` trees).
+Generated documents and queries are run through three implementations of RFC 9535 and every disagreement is
+recorded: the Parsson fork and the Johnzon fork (both implement the proposed `jakarta.json.JsonPath` API) and
+Treetrail 1.0.0 (`jsonpath-core` + `jsonpath-jsonp`, which works on the same `JsonValue` trees through its own
+`JsonModel`).
+
+**These are not three independent implementations.** They are one design in three code bases: the Parsson
+implementation was ported from Treetrail by the same author, and the Johnzon implementation from Parsson. They are
+written differently (Treetrail evaluates over its `JsonModel` abstraction, the forks work directly on `JsonValue`), so
+a porting mistake or a difference in how a JSON-P implementation handles numbers, strings or parsing shows up here.
+A misreading of RFC 9535 that all three share does not. Independent evidence of correctness comes from the
+JSONPath Compliance Test Suite (maintained by others) and the TCK, not from this comparison.
 
 ## What is compared
 
@@ -84,9 +91,10 @@ of Parsson and Johnzon produce them in the same order as each other.
 
 ## Limits of this evidence
 
-- The implementations share the approach of the proposal (the Johnzon port follows the Parsson one), so agreement of
-  those two proves less than agreement with Treetrail, which is independent of both; no query ever separated
-  Treetrail from the pair.
+- Shared lineage: the three agree because they implement one design, so agreement is evidence that the ports are
+  faithful and that the JSON-P types (numbers, strings, parsing) behave alike in Parsson and Johnzon. It is not
+  evidence that the design reads RFC 9535 correctly; that rests on the Compliance Test Suite and the TCK. A fourth,
+  genuinely independent RFC 9535 implementation on the JVM would add that, but none was added here.
 - Documents are parsed from text. Documents built with the builder API (Johnzon has three number classes) are covered
   by Johnzon's own tests (`JohnzonNumbersTest`), not here. Documents with duplicate member names are not generated
   (RFC 8259 leaves their meaning open).
