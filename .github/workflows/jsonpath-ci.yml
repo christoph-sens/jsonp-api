@@ -4,6 +4,9 @@
 #   built API. Released Parsson has no JsonProvider.createPath, so this job excludes the JUnit tag `jsonpath`.
 # - jsonpath-tck-parsson-fork: runs only the `jsonpath` tests against christoph-sens/parsson@jsonpath, built with this API.
 #   A certification run of the TCK excludes no tag.
+# - jsonpath-tck-johnzon-fork: the same against christoph-sens/johnzon@jsonpath. The TCK module wires its provider
+#   as org.eclipse.parsson:parsson:${parsson.version}, so the job installs the Johnzon core jar under that
+#   coordinate with the version `johnzon-fork` (the TCK sources stay untouched).
 #
 # JDK 11 is not in the matrix: the API build (maven.compiler release 17 / multi-release jar) and the TCK modules
 # (release 17) need at least JDK 17. The API itself still targets Java 11 bytecode.
@@ -82,5 +85,49 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jsonpath-tck-parsson-fork-reports-jdk${{ matrix.java_version }}
+          path: tck/**/target/surefire-reports
+          if-no-files-found: ignore
+
+  jsonpath-tck-johnzon-fork:
+    # Not a gate until JSONPath in Johnzon (christoph-sens/johnzon, E1) is merged into its jsonpath branch;
+    # a follow-up removes continue-on-error.
+    continue-on-error: true
+    name: JSONPath TCK against Johnzon fork on JDK ${{ matrix.java_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java_version: [ 17, 21, 25 ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Johnzon fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/johnzon
+          ref: jsonpath
+          path: johnzon
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java_version }}
+          cache: maven
+      - name: Build and install API
+        run: cd api && mvn -B -V -U -C -Poss-release -Pstaging clean install -Dgpg.skip=true
+      - name: Build Johnzon core with this API
+        run: |
+          cd johnzon
+          git log -1 --format='Johnzon fork at %H %s'
+          mvn -B -V -C clean package -pl johnzon-core -DskipTests -Drat.skip=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true
+          echo "JOHNZON_JAR=$(ls $PWD/johnzon-core/target/johnzon-core-*-SNAPSHOT.jar | grep -v -e sources -e javadoc)" >> "$GITHUB_ENV"
+      - name: Install the Johnzon core jar as the TCK's provider
+        run: mvn -B -q install:install-file -Dfile="$JOHNZON_JAR" -DgroupId=org.eclipse.parsson -DartifactId=parsson -Dversion=johnzon-fork -Dpackaging=jar -DgeneratePom=true
+      - name: JSONPath TCK against Johnzon
+        run: cd tck && mvn -B -V -U -C -Ptck-tests-ci -Pstaging -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT -Dparsson.version=johnzon-fork -Dgroups=jsonpath -pl tck-tests -am clean verify
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jsonpath-tck-johnzon-fork-reports-jdk${{ matrix.java_version }}
           path: tck/**/target/surefire-reports
           if-no-files-found: ignore
