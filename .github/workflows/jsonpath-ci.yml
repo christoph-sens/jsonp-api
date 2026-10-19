@@ -89,9 +89,6 @@ jobs:
           if-no-files-found: ignore
 
   jsonpath-tck-johnzon-fork:
-    # Not a gate until JSONPath in Johnzon (christoph-sens/johnzon, E1) is merged into its jsonpath branch;
-    # a follow-up removes continue-on-error.
-    continue-on-error: true
     name: JSONPath TCK against Johnzon fork on JDK ${{ matrix.java_version }}
     runs-on: ubuntu-latest
     strategy:
