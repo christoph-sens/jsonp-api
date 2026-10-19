@@ -50,10 +50,6 @@ jobs:
   jsonpath-tck-parsson-fork:
     name: JSONPath TCK against Parsson fork on JDK ${{ matrix.java_version }}
     runs-on: ubuntu-latest
-    # Informational: Parsson implements createPath only with ticket D6 (JsonProviderImpl.createPath) in
-    # christoph-sens/parsson; until then every JSONPath test fails with UnsupportedOperationException.
-    # Remove continue-on-error once D6 is merged into christoph-sens/parsson@jsonpath.
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
