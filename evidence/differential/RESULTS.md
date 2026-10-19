@@ -72,7 +72,8 @@ value and defines the comparison for every number the document holds (numbers ou
 are an interoperability warning in RFC 9535 and RFC 8259, not an error); a query must not fail
 with an unchecked exception that is not a `JsonException` because of the size of a number in the data. Fixed in
 christoph-sens/johnzon#4 (falls back to the number's literal, so there is no cost for ordinary numbers); the minimal
-repros are in `RegressionTest`. After the fix the three agree.
+repros are in `RegressionTest`. Parsson handles these numbers correctly (it compares them without the scale limit and returned the same nodes as
+Treetrail from the first run on), so no Parsson change is needed. After the Johnzon fix the three agree.
 
 ## No other differences
 
