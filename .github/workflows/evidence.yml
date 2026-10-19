@@ -1,0 +1,88 @@
+#
+# CI for the `evidence` branch: builds the API, the Parsson fork and the Johnzon fork from their `jsonpath`
+# branches, then runs the evidence modules (evidence/) against them. Not part of the upstream-bound `jsonpath` branch.
+#
+# The default budget is small and the seed is fixed, so a run is reproducible. For a longer run use
+# "Run workflow" and set docs (number of generated documents; each is queried queriesPerDoc times) and seed.
+#
+name: Evidence
+
+on:
+  push:
+    branches: [ evidence ]
+  pull_request:
+    branches: [ evidence ]
+  workflow_dispatch:
+    inputs:
+      docs:
+        description: Generated documents per differential run
+        default: '5000'
+      queriesPerDoc:
+        description: Queries per document
+        default: '40'
+      seed:
+        description: Master seed
+        default: '20261019'
+
+concurrency:
+  group: evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  differential:
+    name: Differential tests on JDK ${{ matrix.java_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java_version: [ 17, 21, 25 ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Parsson fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/parsson
+          ref: jsonpath
+          path: parsson
+      - name: Check out Johnzon fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/johnzon
+          ref: jsonpath
+          path: johnzon
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java_version }}
+          cache: maven
+      - name: Build and install API
+        run: cd api && mvn -B -V -U -C -Poss-release -Pstaging clean install -DskipTests -Dgpg.skip=true
+      - name: Build and install Parsson with this API
+        run: |
+          cd parsson
+          git log -1 --format='Parsson fork at %H %s'
+          mvn -B -V -U -C -Pstaging clean install -pl impl -am -DskipTests -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT
+      - name: Build and install Johnzon core with this API
+        run: |
+          cd johnzon
+          git log -1 --format='Johnzon fork at %H %s'
+          mvn -B -V -C -N install -DskipTests -Drat.skip=true -Dcheckstyle.skip=true
+          mvn -B -V -C install -pl johnzon-core -DskipTests -Drat.skip=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true
+      - name: Differential tests (Parsson vs. Johnzon vs. Treetrail)
+        run: |
+          cd evidence
+          mvn -B -V -U -C test \
+            ${{ inputs.docs && format('-Devidence.docs={0}', inputs.docs) || '' }} \
+            ${{ inputs.queriesPerDoc && format('-Devidence.queriesPerDoc={0}', inputs.queriesPerDoc) || '' }} \
+            ${{ inputs.seed && format('-Devidence.seed={0}', inputs.seed) || '' }}
+      - name: Show the differential summary
+        if: always()
+        run: grep -h -a -A40 'DIFFERENTIAL\|implementations disagree' evidence/differential/target/surefire-reports/*.txt evidence/differential/target/surefire-reports/*-output.txt 2>/dev/null | head -150 || true
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: differential-reports-jdk${{ matrix.java_version }}
+          path: evidence/**/target/surefire-reports
+          if-no-files-found: ignore

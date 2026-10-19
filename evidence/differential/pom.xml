@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.christophsens.evidence</groupId>
+        <artifactId>evidence-parent</artifactId>
+        <version>0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>evidence-differential</artifactId>
+    <name>Differential tests: Parsson vs. Johnzon vs. Treetrail</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.johnzon</groupId>
+            <artifactId>johnzon-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.treetrail</groupId>
+            <artifactId>jsonpath-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.treetrail</groupId>
+            <artifactId>jsonpath-jsonp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Budget and seed are system properties: -Devidence.docs, -Devidence.queriesPerDoc, -Devidence.seed -->
+                    <systemPropertyVariables>
+                        <evidence.docs>${evidence.docs}</evidence.docs>
+                        <evidence.queriesPerDoc>${evidence.queriesPerDoc}</evidence.queriesPerDoc>
+                        <evidence.seed>${evidence.seed}</evidence.seed>
+                        <evidence.replay>${evidence.replay}</evidence.replay>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <evidence.docs>5000</evidence.docs>
+        <evidence.queriesPerDoc>40</evidence.queriesPerDoc>
+        <evidence.seed>20261019</evidence.seed>
+        <evidence.replay></evidence.replay>
+    </properties>
+</project>
