@@ -1,6 +1,7 @@
 # JSONPath (RFC 9535) in Jakarta JSON Processing — design
 
-Status: draft for review. Tracking: christoph-sens/jsonp-api#4 (this document), #5 (API).
+Status: draft for review. Tracking: christoph-sens/jsonp-api#4 (this document), #5 (API), #6 (streaming),
+#7 (configuration).
 Upstream discussion: jakartaee/jsonp-api#448.
 
 ## 1. Goal and scope
@@ -41,11 +42,13 @@ for (JsonPath.Node node : nodes) {
 | `JsonProvider.createPath(String)` | Default throws `UnsupportedOperationException`, as `createPointer` did when it was added in 1.1, so existing providers stay source and binary compatible. |
 | `JsonPath` | Immutable, safe for concurrent use. `query(JsonValue)` returns an unmodifiable `List<JsonPath.Node>`. `toString()` returns the query string. |
 | `JsonPath.Node` | `getValue()`, `getPath()` (normalized path, RFC 9535 section 2.7), `getPointer()` (RFC 6901). |
+| `Json.createPath(String, Map<String, ?>)` | Same, with the limits of section 5; `JsonProvider.createPath(String, Map)` has the same default as the one-argument method. |
+| `JsonPath.getBuffering()`, `JsonPath.matcher(JsonParser)` | Streaming layer, section 6. |
 
-Every `JsonPath` and `Node` method that might be added later (streaming entry point, `isSingular()`,
-`exists`, a structured path type) can be added as a default method or as a new type; nothing in the
-first version has to change for them. Configuration (section 5) is added as an overload of
-`createPath`, the way `createReaderFactory(Map)` sits next to `createReader`.
+Every `JsonPath` and `Node` method that might be added later (`isSingular()`, `exists`, a structured
+path type) can be added as a default method or as a new type; nothing in the first version has to
+change for them. Configuration (section 5) is an overload of `createPath`, the way
+`createReaderFactory(Map)` sits next to `createReader`.
 
 ## 3. Semantics of RFC 9535 on JSON-P types
 
@@ -157,7 +160,11 @@ and are required. Unknown function names and ill-typed calls are syntax errors (
 | --- | --- | --- |
 | Query string is `null`; `query(null)` | `NullPointerException` | |
 | Query not well-formed or not valid (section 2.1), including integers outside ±(2^53−1), unknown functions, ill-typed function calls | `JsonException` from `createPath` | Message with the reason, the character position, and an excerpt of the query around it, at most about 60 characters so that long queries do not end up in logs in full |
-| Query exceeds a limit at evaluation time (section 5) | `JsonException` from `query` | Message names the limit |
+| Query exceeds a limit at evaluation time (section 5) | `JsonException` from `query`, `Matcher.find()` or `Matcher.getValue()` | Message names the limit |
+| Query nested deeper than `maxNesting` (section 5) | `JsonException` from `createPath` | As for syntax errors |
+| Configuration property with an invalid value (not a non-negative integer) | `JsonException` from `createPath` | Property name |
+| `matcher()` for a query of class `UNBOUNDED` (section 6.3) | `JsonException` from `matcher` | |
+| Streaming: the parser is not before a JSON value | `IllegalStateException` from the first `find()` | |
 | Streaming: the JSON text is invalid | `JsonParsingException`, as from the parser | `getLocation()` |
 | Provider without JSONPath support | `UnsupportedOperationException` | |
 
@@ -176,99 +183,184 @@ with `getLocation()`) can be added later without breaking callers, because it is
 
 ## 5. Limits for untrusted queries
 
-RFC 9535 section 4.1 asks implementations to defend against crafted queries and documents. The spec
-defines these limits; their names and defaults are fixed in the configuration ticket
-(christoph-sens/jsonp-api#7), as JSON-P configuration properties passed in a `Map<String, ?>`:
+RFC 9535 section 4.1 asks implementations to defend against crafted queries and documents. The limits
+are JSON-P configuration properties, passed to `Json.createPath(String, Map<String, ?>)` as
+`createReaderFactory(Map)` takes its properties. The names are constants of `JsonPath`; the values are
+non-negative integers, given as a `Number` or a decimal `String`. Properties a provider does not
+support are ignored, as elsewhere in JSON-P; an invalid value of one of these properties makes
+`createPath` throw `JsonException`. `Json.createPath(String)` uses the defaults. A limit is part of the
+`JsonPath`; it applies to every `query` and every `matcher` of that instance.
 
-| Limit | Checked at | Purpose | Reference default |
+| Property (`JsonPath.` constant) | Checked at | Purpose | Default |
 | --- | --- | --- | --- |
-| Nesting of filters, parentheses and function calls in the query | `createPath` | Bounds parser recursion | 64 |
-| Size of a regular expression after expansion of counted repetitions | `createPath` for literals, evaluation for patterns from the document | `(a{1000}){1000}` | 20,000 automaton instructions; beyond it the pattern is invalid |
-| Visited nodes per evaluation | `query` | Bounds time: nested descendant segments and filters multiply work | 100,000,000 |
-| Nesting depth of the document | `query` | Bounds walks and structural comparison | 1,000 (Parsson's parser default) |
-| Nodes in a result | `query` | Bounds memory of `$..*`-style results | unlimited |
+| `jakarta.json.JsonPath.maxNesting` (`MAX_NESTING`) | `createPath` | Nesting of filters, parenthesized expressions and function calls in the query; bounds parser recursion | 64 |
+| `jakarta.json.JsonPath.maxRegexSize` (`MAX_REGEX_SIZE`) | `createPath` for literals, evaluation for patterns from the document | Size of a regular expression after expansion of counted repetitions, `(a{1000}){1000}`; beyond it the pattern is invalid and the function returns false | implementation specific (Parsson: 20,000 automaton instructions) |
+| `jakarta.json.JsonPath.maxVisitedNodes` (`MAX_VISITED_NODES`) | `query`, `Matcher.find()` | Bounds time: nested descendant segments and filters multiply work | 100,000,000 |
+| `jakarta.json.JsonPath.maxDepth` (`MAX_DEPTH`) | `query`, `Matcher.find()` | Nesting depth of the query argument that a query walks into, and of `==` comparisons | 1,000 |
+| `jakarta.json.JsonPath.maxResultSize` (`MAX_RESULT_SIZE`) | `query` | Bounds memory of `$..*`-style results; does not apply to the matcher, which collects nothing | unlimited |
 
-Reference defaults are Treetrail's. The spec states the limits and that exceeding one throws
-`JsonException`; it lets implementations choose defaults, but requires a documented default for each.
-Regex matching is linear (section 3.8) independent of these limits.
+Decisions:
+
+- **Defaults are part of the spec** where the measure is portable (nesting, depth, result size, visited
+  nodes), so the same query on the same document behaves alike across providers. They are Treetrail's
+  and Parsson's values. Providers may offer their own way to change the defaults (Parsson reads system
+  properties).
+- **Visited nodes are counted, not timed.** A visit is each node a selector selects, each node a
+  descendant segment walks through and each node a filter tests, within queries inside filters too; the
+  matcher also counts each value it reads. Implementations may skip work that cannot change the result
+  (an absolute query inside a filter is evaluated once), so the exact count is implementation specific.
+  It is never less than the number of selected nodes, which is what the TCK checks, together with a
+  generous limit that must not fail.
+- **The regular-expression size has an implementation-specific unit.** A portable measure would have to
+  count every construct that makes an automaton grow (`(|){100000}` has no characters but 200,000
+  instructions in Parsson), which ties the spec to one compilation scheme. The spec requires a unit that
+  grows at least linearly with the characters and character classes of the expanded expression and asks
+  implementations to document unit and default. Regex matching is linear (section 3.8) independent of
+  this limit.
+- **No limit on streaming buffers.** What the matcher buffers is bounded by the query and the size of the
+  values it tests (section 6.3), and the parser's own limits bound the size of any value. A separate
+  limit is open question Q7.
 
 ## 6. Streaming layer over `JsonParser`
 
-Specified in christoph-sens/jsonp-api#6; this section fixes the model that ticket builds on.
+Specified in christoph-sens/jsonp-api#6 (Javadoc of `JsonPath.matcher`, `JsonPath.Matcher` and
+`JsonPath.Buffering`).
 
 ### 6.1 Model
 
 The caller hands a `JsonParser` to the query and pulls matches. For each match it learns the
-normalized path and the parser location, and then either takes the value (`getValue()`) or skips it.
-Sketch only, names to be settled in #6:
+normalized path, the JSON Pointer and the location in the text, and then either takes the value or
+leaves it:
 
 ```java
 JsonPath path = Json.createPath("$.orders[*].id");
 try (JsonParser parser = Json.createParser(input)) {
-    JsonPath.Matcher m = path.matcher(parser);   // throws if the query is not streamable
-    while (m.next()) {
-        String where = m.getPath();
-        JsonValue id = m.getValue();             // or m.skip()
+    JsonPath.Matcher m = path.matcher(parser);   // JsonException if the query is UNBOUNDED
+    while (m.find()) {
+        String where = m.getPath();              // $['orders'][7]['id']
+        JsonLocation at = m.getLocation();       // line, column, offset of the value
+        JsonValue id = m.getValue();             // or leave it: find() skips it
     }
 }
 ```
 
-**Order.** The streaming layer reports matches in **document order**: a match is reported when the
-parser reaches the start of its value. The tree layer reports the RFC's nodelist order. For the
-no-buffering class (6.2) the two orders are the same. For other queries the streaming layer reports
-the same nodes the same number of times, possibly in another order. The reason: RFC order can
-require buffering the whole document. `$..a` on `{"x": {...}, "a": 2}` must report `$['a']` before
-every match inside `x`, although `x` comes first in the text; `$..[1]` on `[[7, 8], 9]` must report
-`9` before `8`. Document order also matches what a caller of a streaming API expects. Callers that
-need RFC order use the tree layer. (Open question Q1.)
+| Element | Contract |
+| --- | --- |
+| `JsonPath.getBuffering()` | `NONE`, `BOUNDED` or `UNBOUNDED` (6.3), from the query alone. |
+| `JsonPath.matcher(JsonParser)` | Reads nothing yet. The query argument is the value whose first event the parser returns next: a new parser, a parser after `KEY_NAME`, or before an array element. Throws `JsonException` for `UNBOUNDED`. |
+| `Matcher.find()` | Advances to the next match; `false` after the last event of the query argument, which is the parser's current event then. Never reads beyond it and never closes the parser. |
+| `Matcher.getPath()`, `getPointer()` | As `Node.getPath()`, `Node.getPointer()`, relative to the query argument. |
+| `Matcher.getLocation()` | `JsonParser.getLocation()` as it was when the parser's current event was the first event of the match's value. |
+| `Matcher.getValue()` | The value, read from the parser if needed (`JsonParser.getValue()` where nothing inside can match). Repeated calls return equal values. |
 
-### 6.2 Streamable query classes
+The values go through the matcher, not through the parser directly, although the parser is positioned
+at the match in class `NONE`. Three reasons: the same calls work for all classes, including matches the
+matcher had to buffer; the matcher knows whether a value was consumed without relying on
+`JsonParser.currentEvent()`, which parsers before 2.1 lack; and taking a value never changes which
+nodes are reported (below). Between calls the caller may use the parser's methods that do not move it
+(`getString()`, `getLong()`, `getBigDecimal()`, `getLocation()`, `currentEvent()`, ...), so a scalar
+can be read without creating a `JsonValue`. A value the caller leaves is skipped with
+`skipObject()`/`skipArray()` when nothing inside it can match.
 
-A query falls into the first class whose conditions it meets. The class is a property of the query
-alone, so `createPath` can compute it and the API can report it before any input is read.
+**Which nodes.** The matcher reports the nodes `query(parser.getValue())` returns, each as often. A
+node selected twice (`$[0,0]`, `$..*..*`) is reported twice in a row. Taking an outer value does not hide
+the matches inside it (`$..a` on `{"a": {"a": 1}}`): they are reported after it, from that value. The
+TCK checks this as "the matcher's paths equal the tree layer's paths sorted into document order".
 
-**Class 1 — no buffering.** Memory independent of the document. Every segment is a child segment
-(no `..`), and every selector is one of:
+**Duplicate member names.** The parser delivers every occurrence, and each is a node of its own for the
+matcher. The tree layer sees whatever the reader made of them. (Open question Q4.)
 
-- a name selector,
-- a wildcard,
-- a non-negative index,
-- a slice with non-negative (or omitted) start and end and a positive (or omitted) step,
+### 6.2 Order
 
-with the restriction that no two selectors of one segment can select the same child (for example
-`['a','b']` and `[0,2]` qualify, `[0,0]`, `[*,0]` and `[0:2,1]` do not). Each match is reported once
-and its value is read straight from the parser.
+The streaming layer reports matches in **document order**: a node before the nodes inside its value,
+other nodes in the order in which their values start in the text. The tree layer reports the RFC's
+nodelist order. Both report the same nodes the same number of times; the order differs whenever a
+segment selects children out of document order or a descendant segment meets nested matches:
 
-**Class 2 — bounded buffering.** Memory bounded by the size of the largest candidate or match value,
-plus a number of array elements fixed by the query, but independent of the size of the rest of the
-document. A query is in class 2 if it is not in class 1 and needs only:
+- `$..b` on `{"a": {"b": 1}, "b": 2}`: RFC order is `$['b']` (2), then `$['a']['b']` (1), because the
+  descendant segment applies `b` to the root before it visits `a`. Document order is 1, then 2.
+- `$['b','a']` on `{"a": 1, "b": 2}`: RFC order is `b` then `a` (selector order); document order `a`
+  then `b`.
+- `$..[1]` on `[[7, 8], 9]`: RFC order 9 then 8; document order 8 then 9.
 
-- **Filters on the current node** (`[?@.price < 10]`, `[?length(@.tags) > 2]`, `[?@..x]`): the
-  candidate child is buffered until the filter is decided, then reported or dropped.
-- **Negative indices** (`[-1]`): needs the array length; the last |i| elements are kept in a window.
-- **Slices with a negative start or end, or a negative step**: same reason, window bounded by the
-  slice parameters (`[-3:]` keeps 3 elements; `[5:1:-2]` keeps at most 4).
-- **Selectors of one segment that can select the same child** (`[0,0]`, `[*,0]`): the child is
-  buffered so that it can be reported once per selection.
-- **Descendant segments** (`$..a`, `$..*`): with document order no match is held back, but matches
-  can nest (`$..a` on `{"a": {"a": 1}}`). When the caller takes the outer value, the inner matches
-  are reported from that value, which the layer has built anyway; when the caller skips the outer
-  value, the layer reads on and still reports the inner matches. The buffer is the outer value the
-  caller asked for.
+RFC order can require buffering the whole document (`$..b` must report the root's `b`, which may be the
+last member, before anything inside `a`). Document order is also what a caller of a streaming API
+expects. Callers that need RFC order use the tree layer. (Open question Q1.)
 
-**Class 3 — whole document.** Filters that contain an absolute query (`[?@.price < $.limit]`): the
-filter cannot be decided before the end of the document. The streaming layer does not evaluate
-these queries; it throws, and the caller uses the tree layer. Materializing silently would defeat
-the purpose of the API.
+An earlier draft of this section said both orders are the same for class 1 (no buffering). That is
+wrong for selector lists in non-document order (`$['b','a']`, `$[2,0]`); the spec now says document
+order for every query.
 
-The classification is conservative: class 2 by the rules above may need no buffer for a particular
-document. The TCK tests that each streaming result equals the tree result sorted into document order,
-and that class 1 and 2 queries are accepted.
+### 6.3 Buffering classes
 
-How this differs from the first sketch of the classes, which put all selector lists into class 2 and
-called descendant segments bounded without qualification: with document order, selector lists that cannot select a child twice
-need no buffer (class 1), and descendant segments are bounded only because of document order; under
-RFC order they would be class 3.
+The class is a property of the query alone, computed by `createPath` and returned by `getBuffering()`, so
+all implementations agree on it and the TCK tests it exactly. The rules look at the segments of the
+query; queries inside filters run on a buffered candidate and matter only for absolute queries.
+
+The question behind the rules: can a selector decide whether it selects a child at the moment the
+parser reaches the child? Names, wildcards, non-negative indices and slices counted from the start can.
+Filters need the child's value. Negative indices and slices counted from the end need the array's
+length. With document order, a node selected by several selectors, or reached by several descendant
+segments, is simply reported several times at that point.
+
+**`NONE` — no buffering.** No filter selector, every index non-negative, every slice with start and end
+non-negative or omitted and a step that is omitted or at least -1. Descendant segments and selector
+lists are unrestricted: `$.store.book[*].title`, `$..id`, `$['a','b']`, `$[0,0]`, `$[1:5:2]`,
+`$[::-1]`. Guarantee: when `find()` returns true, the parser's current event is the first event of the
+match's value, unless the match lies inside a value the caller took (then the match is reported from
+that value), or it repeats the previous match and the caller took that value. The matcher holds no values
+other than the ones the caller asked for. Step -1 qualifies: `[5:1:-1]` selects the indices 2 to 5 that
+exist, which is known for each index on its own.
+
+**`BOUNDED` — buffering bounded by the query and the tested values.** Everything not in the other two
+classes:
+
+- Filters with only relative queries (`[?@.price < 10]`, `[?length(@.tags) > 2]`, `[?@..x]`): each child
+  the filter tests is held until its value ends and the filter is decided.
+- Negative indices `[-n]` and slices with a start or end `-n`: at most the last `n` elements of an array
+  are undecided at any time.
+- Slices with a step below -1 and a non-negative start `s` (`[5:1:-2]`): which indices are selected
+  depends on whether the array has more than `s` elements, so up to `s + 1` elements are held until
+  element `s` or the end of the array is reached.
+
+The matcher holds the values of matches and candidates that depend on such a decision, and nothing else;
+a match that comes after an undecided one in document order waits for it. Memory depends on these
+values, not on the size of the rest of the document.
+
+**`UNBOUNDED` — may need the whole document.**
+
+- Filters that contain an absolute query anywhere (`[?@.price < $.limit]`, also inside nested filters
+  or function arguments): the filter cannot be decided before `$.limit` is read, which may be the last
+  member of the document.
+- Slices with a step below -1 whose start is negative or omitted and whose end is non-negative or omitted
+  (`[::-2]`, `[-1:0:-3]`): the first selected index counts from the end of the array, and which indices
+  follow depends on the length modulo the step, so every element is a candidate until the array ends.
+
+`matcher()` rejects these queries with `JsonException` rather than buffering silently, because
+materializing would defeat the purpose of the API; the alternative is one line,
+`path.query(parser.getValue())`, and the caller decides to accept the memory.
+
+How this differs from the classes presented in jakartaee/jsonp-api#448: there, selector lists and
+descendant segments needed buffering, because results were meant to be in RFC order. With document order
+they need none. The slices that need the whole array (`[::-2]`) were missing.
+
+### 6.4 Parser state
+
+| When | Parser's current event |
+| --- | --- |
+| `matcher()` returns | Unchanged; nothing read. |
+| `find()` returns true, class `NONE` | First event of the match's value (exceptions above). |
+| `find()` returns true, other classes | That event, or after the end of the match's value. |
+| `getValue()` read the value from the parser | Last event of the value, as after `JsonParser.getValue()`. |
+| `find()` returns false | Last event of the query argument; nothing beyond it read. |
+
+Calls between matcher calls that move the parser (`next()`, `getValue()`, `getObject()`, `skipObject()`,
+the stream methods, `close()`) have an unspecified effect.
+
+### 6.5 Limits
+
+`maxVisitedNodes` and `maxDepth` apply per matcher; every value the matcher reads counts as a visit,
+plus the visits of filters on buffered candidates. `maxResultSize` does not apply.
 
 ## 7. Non-goals
 
@@ -283,10 +375,17 @@ RFC order they would be class 3.
 
 ## 8. Compatibility and versioning
 
-- The API module stays at Java 11 (`maven-compiler-plugin` release 11). New elements carry
-  `@since 2.2`, the next specification version in `api/pom.xml`.
-- `JsonProvider.createPath` has a default implementation, so existing providers keep compiling and
-  linking; their `Json.createPath` throws `UnsupportedOperationException` until they implement it.
+- The API module is built with `maven-compiler-plugin` release 17, as jakartaee/jsonp-api master is
+  since November 2025 (e74e6d7). New elements carry `@since 2.2`, the next specification version in
+  `api/pom.xml`.
+- `JsonProvider.createPath` (both overloads) has a default implementation, so existing providers keep
+  compiling and linking; their `Json.createPath` throws `UnsupportedOperationException` until they
+  implement it.
+- `JsonPath.getBuffering()` and `JsonPath.matcher()` are default methods that throw
+  `UnsupportedOperationException`. `JsonPath` is new in 2.2, so they could be abstract; they are
+  default methods while implementations outside this repository (Parsson, Johnzon) follow the drafts,
+  because CI builds them against this branch. Whether they become abstract before the release is open
+  question Q8.
 - No new package and no change to `module-info.java`: `JsonPath` lives in `jakarta.json` next to
   `JsonPointer`.
 
@@ -320,3 +419,10 @@ RFC text confirms it. The checks:
 - **Q5 `^` and `$` in `match()`/`search()`**: follow the CTS (as Treetrail does) or RFC 9485 literally?
 - **Q6 `Node.equals`**: leave it unspecified (proposed: compare `getPath()`), or define equality as
   same path and equal value?
+- **Q7 Streaming buffer limit**: add a configuration property that bounds the values the matcher holds
+  for class `BOUNDED` (section 6.3), or rely on the parser's limits (proposed for now)?
+- **Q8 Default methods on `JsonPath`**: keep `getBuffering()` and `matcher()` as default methods throwing
+  `UnsupportedOperationException`, or make them abstract, since `JsonPath` is new in 2.2?
+- **Q9 Streaming API shape**: values through the matcher (proposed, section 6.1), or let callers read
+  and skip values on the parser directly, as sketched in jakartaee/jsonp-api#448? The latter needs
+  `JsonParser.currentEvent()` and works only for class `NONE`.
