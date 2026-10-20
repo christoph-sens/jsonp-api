@@ -1,0 +1,280 @@
+class,method,line,mutator,description,status
+Ast,<init>,167,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Ast,<init>,167,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Ast,<init>,168,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,visit,132,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,visit,132,Math,Replaced Unsigned Shift Right with Shift Left,SURVIVED
+Evaluator,visit,132,Math,Replaced Unsigned Shift Right with Shift Left,SURVIVED
+Evaluator,visit,132,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Evaluator,visitNodes,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,visitNodes,144,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Evaluator,visitNodes,148,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,visitNodes,148,Math,Replaced Unsigned Shift Right with Shift Left,SURVIVED
+Evaluator,visitNodes,148,Math,Replaced Unsigned Shift Right with Shift Left,SURVIVED
+Evaluator,visitNodes,148,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,visitNodes,148,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Evaluator,checkLimits,171,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,checkDepth,181,Math,Replaced integer addition with subtraction,SURVIVED
+Evaluator,firstOf,215,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,lambda$firstOf$0,220,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::lambda$firstOf$0,SURVIVED
+Evaluator,apply,239,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::apply,SURVIVED
+Evaluator,apply,243,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::apply,SURVIVED
+Evaluator,apply,256,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,apply,257,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::apply,SURVIVED
+Evaluator,reverse,283,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,pushChildren,297,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,pushChildren,298,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Evaluator::checkDepth,SURVIVED
+Evaluator,pushChildren,300,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,pushChildren,310,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,select,325,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,select,326,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::select,SURVIVED
+Evaluator,select,337,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::select,SURVIVED
+Evaluator,select,340,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,select,342,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,select,343,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::select,NO_COVERAGE
+Evaluator,select,357,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::select,SURVIVED
+Evaluator,select,373,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,select,374,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::select,SURVIVED
+Evaluator,select,378,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::select,SURVIVED
+Evaluator,selectChildren,395,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,selectChildren,396,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::selectChildren,SURVIVED
+Evaluator,selectChildren,402,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,selectChildren,407,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,selectChildren,408,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::selectChildren,SURVIVED
+Evaluator,selectChild,417,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::selectChild,SURVIVED
+Evaluator,slice,428,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,slice,428,Math,Replaced long subtraction with addition,SURVIVED
+Evaluator,slice,429,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,slice,432,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,slice,436,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,slice,437,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::slice,SURVIVED
+Evaluator,slice,442,Math,Replaced long subtraction with addition,SURVIVED
+Evaluator,slice,444,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,slice,445,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::slice,NO_COVERAGE
+Evaluator,sliced,454,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,sliced,455,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Evaluator::sliced,SURVIVED
+JsonPathMessages,excerpt,61,ConditionalsBoundary,changed conditional boundary,SURVIVED
+JsonPathMessages,excerpt,62,Math,Replaced integer subtraction with addition,SURVIVED
+JsonPathMessages,excerpt,73,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Limits,property,125,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Limits,property,127,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+NodeImpl,getPath,136,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+NodeImpl,getPath,143,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+NodeImpl,appendName,197,ConditionalsBoundary,changed conditional boundary,SURVIVED
+NodeImpl,toString,209,EmptyObjectReturnVals,"replaced return value with """" for org/eclipse/parsson/jsonpath/NodeImpl::toString",NO_COVERAGE
+Parser,bracketedSelection,182,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Parser::skipBlanks,SURVIVED
+Parser,selector,202,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,selector,206,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,selector,206,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,indexOrSlice,218,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,optionalInt,253,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,optionalInt,258,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,memberNameShorthand,278,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,basicExpr,331,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,basicExpr,335,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Parser::skipBlanks,SURVIVED
+Parser,basicExpr,336,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,basicExpr,358,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Parser::checkComparable,SURVIVED
+Parser,parenExpr,371,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Parser::skipBlanks,SURVIVED
+Parser,parenExpr,373,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Parser::skipBlanks,SURVIVED
+Parser,parenExpr,375,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,operand,409,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,operand,409,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,functionCall,456,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,argument,472,NullReturnVals,replaced return value with null for org/eclipse/parsson/jsonpath/Parser::argument,NO_COVERAGE
+Parser,checkLogical,497,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,checkLogical,498,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Parser::checkLogical,SURVIVED
+Parser,checkArgument,522,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,checkArgument,523,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Parser::checkLogical,NO_COVERAGE
+Parser,checkArgument,526,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,checkArgument,526,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,checkArgument,526,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,checkArgument,532,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,checkArgument,532,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,number,552,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,number,576,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,stringLiteral,612,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,stringLiteral,612,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,escape,621,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,621,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,escape,622,Math,Replaced integer subtraction with addition,NO_COVERAGE
+Parser,escape,650,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,escape,656,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,657,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,escape,662,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,662,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,662,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,escape,666,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,673,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,hex4,678,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,hex4,678,Math,Replaced integer addition with subtraction,SURVIVED
+Parser,hex4,678,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,isNameFirst,705,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,isFunctionNameChar,717,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,isFunctionNameChar,717,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,isFunctionNameChar,717,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,peek,728,PrimitiveReturns,replaced int return with 0 for org/eclipse/parsson/jsonpath/Parser::peek,SURVIVED
+Parser,peek,731,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,peek,731,Math,Replaced integer addition with subtraction,SURVIVED
+Parser,expect,739,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,unmodifiable,746,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Patterns,<init>,48,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Patterns,get,55,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,decidedAtOnce,120,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,136,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,137,BooleanFalseReturnVals,replaced boolean return with false for org/eclipse/parsson/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,137,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,139,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,140,BooleanFalseReturnVals,replaced boolean return with false for org/eclipse/parsson/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,140,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,143,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,146,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,selects,194,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,selects,194,Math,Replaced long subtraction with addition,SURVIVED
+StreamingMatcher,selects,195,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,selects,198,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,selects,204,Math,Replaced long subtraction with addition,SURVIVED
+StreamingMatcher,selects,205,InvertNegs,removed negation,SURVIVED
+StreamingMatcher,threshold,220,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,threshold,223,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,threshold,226,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,threshold,226,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,add,311,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,add,311,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+StreamingMatcher,getColumnNumber,413,PrimitiveReturns,replaced long return with 0 for org/eclipse/parsson/jsonpath/StreamingMatcher$Location::getColumnNumber,NO_COVERAGE
+StreamingMatcher,toString,423,EmptyObjectReturnVals,"replaced return value with """" for org/eclipse/parsson/jsonpath/StreamingMatcher$Location::toString",NO_COVERAGE
+StreamingMatcher,find,483,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,bufferedNodes,528,PrimitiveReturns,replaced long return with 0 for org/eclipse/parsson/jsonpath/StreamingMatcher::bufferedNodes,SURVIVED
+StreamingMatcher,start,601,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/Evaluator::visitNodes,SURVIVED
+StreamingMatcher,hold,640,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,hold,642,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,release,655,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,proceed,731,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/StreamingMatcher::buffer,SURVIVED
+StreamingMatcher,live,785,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,live,785,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,childItems,796,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,select,823,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,select,823,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+StreamingMatcher,filterDecision,870,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,indexDecision,885,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,indexDecision,891,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,indexDecision,891,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+StreamingMatcher,decideIndices,913,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Values,jsonEquals,153,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,153,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,169,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,170,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Values::jsonEquals,NO_COVERAGE
+Values,jsonEquals,172,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Values,jsonEquals,184,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Values,jsonEquals,184,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,184,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Values,jsonEquals,189,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,190,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/Values::jsonEquals,NO_COVERAGE
+Values,jsonEquals,192,Math,Replaced integer addition with subtraction,SURVIVED
+CharSet,contains,157,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+CharSet,contains,157,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+CharSet,build,200,ConditionalsBoundary,changed conditional boundary,SURVIVED
+CharSet,build,200,Math,Replaced integer addition with subtraction,SURVIVED
+CharSet,toString,218,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+CharSet,toString,218,EmptyObjectReturnVals,"replaced return value with """" for org/eclipse/parsson/jsonpath/regex/CharSet::toString",NO_COVERAGE
+DfaBudget,reserve,76,ConditionalsBoundary,changed conditional boundary,SURVIVED
+DfaBudget,reserve,77,InvertNegs,removed negation,SURVIVED
+DfaBudget,reserve,79,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/regex/DfaBudget::reserve,SURVIVED
+IRegexp,cachedDfaBytes,149,PrimitiveReturns,replaced long return with 0 for org/eclipse/parsson/jsonpath/regex/IRegexp::cachedDfaBytes,SURVIVED
+IRegexp,programSize,154,PrimitiveReturns,replaced int return with 0 for org/eclipse/parsson/jsonpath/regex/IRegexp::programSize,SURVIVED
+IRegexp,automatonBytes,164,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+IRegexp,automaton,196,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+IRegexp,automaton,196,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+IRegexp,automaton,201,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+IRegexp,automaton,201,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,reserve,75,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,reserve,76,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/regex/LazyDfa::reserve,SURVIVED
+LazyDfa,reserve,78,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,reserve,80,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/regex/LazyDfa::reserve,SURVIVED
+LazyDfa,reserve,82,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,reserve,83,InvertNegs,removed negation,SURVIVED
+LazyDfa,reserve,84,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/regex/LazyDfa::reserve,SURVIVED
+LazyDfa,release,90,InvertNegs,removed negation,NO_COVERAGE
+LazyDfa,release,91,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/regex/DfaBudget::release,NO_COVERAGE
+LazyDfa,run,114,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,run,114,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,run,130,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/regex/LazyDfa$State::cache,SURVIVED
+LazyDfa,run,136,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,run,136,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,closureState,171,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,closureState,190,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,closureState,191,NullReturnVals,replaced return value with null for org/eclipse/parsson/jsonpath/regex/LazyDfa::closureState,SURVIVED
+LazyDfa,closureState,193,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,closureState,193,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,closureState,196,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,closureState,196,Math,Replaced long multiplication with division,SURVIVED
+LazyDfa,closureState,197,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,closureState,202,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,closureState,203,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/regex/LazyDfa::release,NO_COVERAGE
+LazyDfa,closureState,204,NullReturnVals,replaced return value with null for org/eclipse/parsson/jsonpath/regex/LazyDfa::closureState,NO_COVERAGE
+LazyDfa,sorted,251,VoidMethodCall,removed call to java/util/Arrays::sort,SURVIVED
+LazyDfa,reachesMatchAtEnd,258,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,<init>,303,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,<init>,303,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,<init>,303,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,transition,308,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,transition,308,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,transition,309,NullReturnVals,replaced return value with null for org/eclipse/parsson/jsonpath/regex/LazyDfa$State::transition,SURVIVED
+LazyDfa,transition,312,NullReturnVals,replaced return value with null for org/eclipse/parsson/jsonpath/regex/LazyDfa$State::transition,SURVIVED
+LazyDfa,cache,316,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,cache,316,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,cache,325,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,cache,333,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,cache,333,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,cache,333,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,cache,333,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,cache,334,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,cache,335,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/regex/LazyDfa::release,NO_COVERAGE
+LazyDfa,generation,358,PrimitiveReturns,replaced int return with 0 for org/eclipse/parsson/jsonpath/regex/LazyDfa::generation,SURVIVED
+LazyDfa,<init>,377,Math,Replaced integer multiplication with division,SURVIVED
+LazyDfa,<init>,377,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,<init>,377,Math,Replaced integer multiplication with division,SURVIVED
+LazyDfa,<init>,377,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,equals,382,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,equals,383,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/regex/LazyDfa$StateKey::equals,NO_COVERAGE
+LazyDfa,equals,386,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,equals,386,BooleanTrueReturnVals,replaced boolean return with true for org/eclipse/parsson/jsonpath/regex/LazyDfa$StateKey::equals,SURVIVED
+LazyDfa,equals,387,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,equals,388,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexCache,get,84,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexCache,lambda$get$0,88,EmptyObjectReturnVals,replaced Long return value with 0L for org/eclipse/parsson/jsonpath/regex/RegexCache::lambda$get$0,SURVIVED
+RegexCache,get,90,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexCache,get,98,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexCache,get,99,EmptyObjectReturnVals,replaced return value with Optional.empty for org/eclipse/parsson/jsonpath/regex/RegexCache::get,NO_COVERAGE
+RegexCache,get,101,Math,Replaced long addition with subtraction,SURVIVED
+RegexCache,instructions,113,PrimitiveReturns,replaced long return with 0 for org/eclipse/parsson/jsonpath/regex/RegexCache::instructions,SURVIVED
+RegexParser,branch,55,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,piece,80,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,quantity,95,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,atom,109,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,atom,114,Math,Replaced integer subtraction with addition,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,141,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+RegexParser,category,191,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,charClass,221,VoidMethodCall,removed call to org/eclipse/parsson/jsonpath/regex/CharSet$Builder::range,SURVIVED
+RegexParser,rangeFrom,247,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,rangeFrom,247,Math,Replaced integer addition with subtraction,SURVIVED
+RegexParser,classChar,261,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,next,276,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,next,276,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,expect,284,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexProgram,size,70,PrimitiveReturns,replaced int return with 0 for org/eclipse/parsson/jsonpath/regex/RegexProgram::size,SURVIVED
+RegexProgram,emitAlternation,125,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexSimulation,step,66,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexSimulation,isDead,77,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexSimulation,isDead,77,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexSimulation,runFrom,157,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+UnicodeCategories,type,55,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED

@@ -11,7 +11,7 @@ and **is not meant for upstream**: nothing in `evidence/` is part of the API, th
 | [`differential`](differential/) | Generated documents and queries run through Parsson, Johnzon and Treetrail; every disagreement is a bug or an explained difference ([RESULTS.md](differential/RESULTS.md)) | F2 |
 | [`benchmarks`](benchmarks/) | JMH: Parsson, Johnzon, Treetrail and Jayway JsonPath on `JsonValue`; compile, query, streaming, hostile regex ([RESULTS.md](benchmarks/RESULTS.md)) | F3 |
 | `fuzz` | Fuzzing of the parser, the evaluator and the streaming matcher | F1 (planned) |
-| `mutation` | Mutation testing of the implementations against the TCK | F4 (planned) |
+| [`mutation`](mutation/) | PIT mutation testing of the Parsson JSONPath implementation ([RESULTS.md](mutation/RESULTS.md)); built with `-Pmutation` | F4 |
 
 ## Running
 

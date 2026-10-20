@@ -1,0 +1,38 @@
+#
+# PIT mutation testing of the Parsson fork's JSONPath implementation (evidence/mutation). Manual only: the run takes
+# a few minutes and its result does not change with every push. The published numbers are in
+# evidence/mutation/RESULTS.md.
+#
+name: Mutation testing
+
+on:
+  workflow_dispatch:
+
+jobs:
+  pit:
+    name: PIT on JDK 21
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Parsson fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/parsson
+          ref: jsonpath
+          path: parsson
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Build and install API
+        run: cd api && mvn -B -V -U -C -Poss-release -Pstaging clean install -DskipTests -Dgpg.skip=true
+      - name: Build Parsson with this API (downloads the Compliance Test Suite)
+        run: cd parsson && mvn -B -V -U -C -Pstaging clean install -pl impl -am -DskipTests -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT
+      - name: PIT
+        run: cd evidence && mvn -B -V -U -C -Pmutation -pl mutation test-compile org.pitest:pitest-maven:mutationCoverage
+      - name: Upload the PIT report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pit-report
+          path: evidence/mutation/target/pit-reports

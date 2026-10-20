@@ -30,6 +30,16 @@
         <junit.version>5.11.4</junit.version>
     </properties>
 
+    <profiles>
+        <!-- Mutation testing compiles the Parsson sources and runs PIT on them; it takes a while, so it is not in the default build. -->
+        <profile>
+            <id>mutation</id>
+            <modules>
+                <module>mutation</module>
+            </modules>
+        </profile>
+    </profiles>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
