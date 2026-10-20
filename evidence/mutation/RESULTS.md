@@ -1,4 +1,4 @@
-# Mutation testing of the Parsson JSONPath implementation
+# Mutation testing of the Parsson and Johnzon JSONPath implementations
 
 [PIT](https://pitest.org) 1.20.0 changes the compiled code of `org.eclipse.parsson.jsonpath` and
 `org.eclipse.parsson.jsonpath.regex` (1,601 mutants with the default mutators) and runs the tests that cover each
@@ -14,12 +14,14 @@ behaviour (an equivalent mutant) or only its speed or memory.
 | PIT | `pitest-maven` 1.20.0, `pitest-junit5-plugin` 1.2.2, mutators `DEFAULTS`, 6 threads |
 | Where the configuration lives | `evidence/mutation/pom.xml` compiles the fork's sources and tests (without `module-info.java`) and runs PIT on them, so the fork's own pom is untouched |
 | Machine and time | Apple M5 Pro, Temurin 25.0.3, about 3.5 minutes per run |
-| Johnzon | Not run (optional); its port has the same structure, so a run would give a similar picture, but that is an expectation, not a measurement |
+| Johnzon | Run the same way, see "Johnzon" below |
 
 Run it with (from `evidence/`, after the fork was built once so that the Compliance Test Suite is downloaded):
 
 ```bash
 mvn -Pmutation -pl mutation test-compile org.pitest:pitest-maven:mutationCoverage -Dparsson.dir=/path/to/parsson
+# the Johnzon fork instead:
+mvn -Pmutation,johnzon -pl mutation test-compile org.pitest:pitest-maven:mutationCoverage -Djohnzon.dir=/path/to/johnzon
 ```
 
 Reports: `mutation/target/pit-reports/index.html`. The survivors are listed in [survivors.csv](survivors.csv).
@@ -78,6 +80,24 @@ By kind of mutation (after):
 | Increments | 22 | 0 | 100.0 % |
 
 
+## Johnzon
+
+The Johnzon fork (`org.apache.johnzon.core.jsonpath` and `.regex`, branch `jsonpath`) was run with the same
+configuration and the same mutators (`-Pmutation,johnzon -Djohnzon.dir=...`), using Johnzon's own tests in that
+package (90 test classes, 245,115 test executions, 3 min 46 s). "After" adds the same `BoundaryTest` as in Parsson
+([christoph-sens/johnzon#6](https://github.com/christoph-sens/johnzon/pull/6), tests only).
+
+| Package | Mutants | Killed before | Killed after | Score before | Score after |
+|---|---:|---:|---:|---:|---:|
+| `org.apache.johnzon.core.jsonpath` | 1124 | 931 | 953 | 82.8 % | 84.8 % |
+| `org.apache.johnzon.core.jsonpath.regex` | 475 | 367 | 368 | 77.3 % | 77.5 % |
+| **both** | 1599 | 1298 | 1321 | 81.2 % | **82.6 %** |
+
+The picture is the same as in Parsson, class by class (for example `LazyDfa` 56 %, `RegexCache` 59 %, `Evaluator`
+78 %, `StreamingMatcher` 88 %), as expected for a port; the survivors are in [survivors-johnzon.csv](survivors-johnzon.csv)
+and fall into the same groups as below. Because Johnzon is a port of Parsson's tests as well, this is not a second
+opinion on the tests' quality, only a check that the port kept them.
+
 ## What the survivors are
 
 279 of the 1,601 mutants survive (24 of them are on lines no test reaches). They were not triaged one by one; this is
@@ -102,16 +122,17 @@ from the classes and mutators above and from reading the code at a sample of the
   place for the next tests.
 - **Messages and `toString`** (`JsonPathMessages`, `NodeImpl.toString`): text, not behaviour.
 
-## Proposed minimum
+## Agreed minimum
 
-PIT has no notion of "enough"; a floor stops the score from falling when code is added. Proposal, **for Christoph to
-confirm**, the achieved score rounded down:
+PIT has no notion of "enough"; a floor stops the score from falling when code is added. Agreed minimum (confirmed by Christoph), the achieved score rounded down:
 
-| Scope | Achieved | Proposed minimum |
+| Scope | Achieved | Agreed minimum |
 |---|---:|---:|
 | `org.eclipse.parsson.jsonpath` | 84.8 % | 84 % |
 | `org.eclipse.parsson.jsonpath.regex` | 77.5 % | 77 % |
 | both | 82.6 % | 82 % |
+
+The same minimums fit Johnzon (84.8 %, 77.5 % and 82.6 % after `BoundaryTest`).
 
 If a gate is added later, `pitest-maven` has `mutationThreshold`; it should go on the whole run and not on a changed
 subset, since mutants of unchanged code react to changes in the tests.

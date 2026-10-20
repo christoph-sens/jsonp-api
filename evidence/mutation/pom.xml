@@ -5,6 +5,7 @@
   ${parsson.dir}/impl and runs PIT on them, so the fork's pom stays untouched. Run (from evidence/):
 
     mvn -Pmutation -pl mutation test-compile org.pitest:pitest-maven:mutationCoverage -Dparsson.dir=/path/to/parsson
+    mvn -Pmutation,johnzon -pl mutation test-compile org.pitest:pitest-maven:mutationCoverage -Djohnzon.dir=/path/to/johnzon
 
   The fork must have been built once (the Compliance Test Suite is downloaded to impl/target/jsonpath-cts).
 -->
@@ -19,7 +20,7 @@
     </parent>
 
     <artifactId>evidence-mutation</artifactId>
-    <name>Mutation testing (PIT) of the Parsson JSONPath implementation</name>
+    <name>Mutation testing (PIT) of the Parsson and Johnzon JSONPath implementations</name>
 
     <properties>
         <parsson.dir>${project.basedir}/../../parsson</parsson.dir>
@@ -27,8 +28,33 @@
         <pitest.junit5.version>1.2.2</pitest.junit5.version>
         <pitest.threads>6</pitest.threads>
         <pitest.mutators>DEFAULTS</pitest.mutators>
+        <!-- The implementation under test; the profile "johnzon" switches to the Johnzon fork (-Pmutation,johnzon -Djohnzon.dir=...). -->
+        <impl.main.src>${parsson.dir}/impl/src/main/java</impl.main.src>
+        <impl.main.res>${impl.main.res}</impl.main.res>
+        <impl.test.src>${parsson.dir}/impl/src/test/java</impl.test.src>
+        <impl.test.res>${impl.test.res}</impl.test.res>
+        <impl.cts>${impl.cts}</impl.cts>
+        <impl.testIncludes>org/eclipse/parsson/jsonpath/**</impl.testIncludes>
         <pitest.targetClasses>org.eclipse.parsson.jsonpath.*</pitest.targetClasses>
+        <pitest.targetTests>org.eclipse.parsson.jsonpath.*</pitest.targetTests>
+        <johnzon.dir>${project.basedir}/../../johnzon</johnzon.dir>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>johnzon</id>
+            <properties>
+                <impl.main.src>${johnzon.dir}/johnzon-core/src/main/java</impl.main.src>
+                <impl.main.res>${johnzon.dir}/johnzon-core/src/main/resources</impl.main.res>
+                <impl.test.src>${johnzon.dir}/johnzon-core/src/test/java</impl.test.src>
+                <impl.test.res>${johnzon.dir}/johnzon-core/src/test/resources</impl.test.res>
+                <impl.cts>${johnzon.dir}/johnzon-core/target/jsonpath-cts/cts.json</impl.cts>
+                <impl.testIncludes>org/apache/johnzon/core/jsonpath/**</impl.testIncludes>
+                <pitest.targetClasses>org.apache.johnzon.core.jsonpath.*</pitest.targetClasses>
+                <pitest.targetTests>org.apache.johnzon.core.jsonpath.*</pitest.targetTests>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
@@ -50,18 +76,27 @@
 
     <build>
         <sourceDirectory>${project.build.directory}/parsson-main</sourceDirectory>
-        <testSourceDirectory>${parsson.dir}/impl/src/test/java</testSourceDirectory>
+        <testSourceDirectory>${impl.test.src}</testSourceDirectory>
         <resources>
             <resource>
-                <directory>${parsson.dir}/impl/src/main/resources</directory>
+                <directory>${impl.main.res}</directory>
             </resource>
         </resources>
         <testResources>
             <testResource>
-                <directory>${parsson.dir}/impl/src/test/resources</directory>
+                <directory>${impl.test.res}</directory>
             </testResource>
         </testResources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <testIncludes>
+                        <testInclude>${impl.testIncludes}</testInclude>
+                    </testIncludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <!-- The sources without module-info.java: PIT and the tests run on the class path. -->
                 <groupId>org.apache.maven.plugins</groupId>
@@ -77,7 +112,7 @@
                             <outputDirectory>${project.build.directory}/parsson-main</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${parsson.dir}/impl/src/main/java</directory>
+                                    <directory>${impl.main.src}</directory>
                                     <excludes>
                                         <exclude>module-info.java</exclude>
                                     </excludes>
@@ -92,7 +127,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
-                        <jsonpath.cts>${parsson.dir}/impl/target/jsonpath-cts/cts.json</jsonpath.cts>
+                        <jsonpath.cts>${impl.cts}</jsonpath.cts>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -112,14 +147,14 @@
                         <param>${pitest.targetClasses}</param>
                     </targetClasses>
                     <targetTests>
-                        <param>org.eclipse.parsson.jsonpath.*</param>
+                        <param>${pitest.targetTests}</param>
                     </targetTests>
                     <mutators>
                         <mutator>${pitest.mutators}</mutator>
                     </mutators>
                     <threads>${pitest.threads}</threads>
                     <jvmArgs>
-                        <value>-Djsonpath.cts=${parsson.dir}/impl/target/jsonpath-cts/cts.json</value>
+                        <value>-Djsonpath.cts=${impl.cts}</value>
                     </jvmArgs>
                     <outputFormats>
                         <value>XML</value>

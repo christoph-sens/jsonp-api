@@ -1,5 +1,5 @@
 #
-# PIT mutation testing of the Parsson fork's JSONPath implementation (evidence/mutation). Manual only: the run takes
+# PIT mutation testing of the Parsson and Johnzon forks' JSONPath implementations (evidence/mutation). Manual only: the run takes
 # a few minutes and its result does not change with every push. The published numbers are in
 # evidence/mutation/RESULTS.md.
 #
@@ -35,4 +35,36 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pit-report
+          path: evidence/mutation/target/pit-reports
+
+  pit-johnzon:
+    name: PIT on Johnzon, JDK 21
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Johnzon fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/johnzon
+          ref: jsonpath
+          path: johnzon
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Build and install API
+        run: cd api && mvn -B -V -U -C -Poss-release -Pstaging clean install -DskipTests -Dgpg.skip=true
+      - name: Build Johnzon core with this API (downloads the Compliance Test Suite)
+        run: |
+          cd johnzon
+          mvn -B -V -C -N install -DskipTests -Drat.skip=true -Dcheckstyle.skip=true
+          mvn -B -V -C install -pl johnzon-core -DskipTests -Drat.skip=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true
+      - name: PIT
+        run: cd evidence && mvn -B -V -U -C -Pmutation,johnzon -pl mutation test-compile org.pitest:pitest-maven:mutationCoverage
+      - name: Upload the PIT report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pit-report-johnzon
           path: evidence/mutation/target/pit-reports
