@@ -1,0 +1,103 @@
+#
+# Fuzzing of the JSONPath implementations of the Parsson and Johnzon forks (evidence/fuzz, ticket F1). Not part of
+# the upstream-bound `jsonpath` branch.
+#
+# Each fuzz target runs in its own job for a bounded time: 2 minutes on pushes and pull requests that change the fuzz
+# module, the "duration" input (default 10m) when started by hand:
+#   gh workflow run fuzz.yml --repo christoph-sens/jsonp-api --ref evidence -f duration=1h
+# There is no schedule: scheduled workflows run only on the default branch (main), and this one lives on `evidence`.
+# The corpus is cached per target, so each run starts where the last one stopped. Findings are uploaded as an artifact: put a
+# crash file into evidence/fuzz/src/test/resources/io/github/christophsens/evidence/fuzz/JsonPathFuzzTestInputs/<target>/
+# so that `mvn test` replays it in every build (the Evidence workflow runs it on every push).
+#
+name: Fuzz
+
+on:
+  push:
+    branches: [ evidence ]
+    paths: [ "evidence/fuzz/**", ".github/workflows/fuzz.yml" ]
+  pull_request:
+    branches: [ evidence ]
+    paths: [ "evidence/fuzz/**", ".github/workflows/fuzz.yml" ]
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: Fuzzing time per target, e.g. 10m or 1h
+        default: 10m
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fuzz-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fuzz:
+    name: Fuzz ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ compileAnyQuery, queryAnyDocument, queryGeneratedDocument, matchAnyRegularExpression ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Parsson fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/parsson
+          ref: jsonpath
+          path: parsson
+      - name: Check out Johnzon fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/johnzon
+          ref: jsonpath
+          path: johnzon
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+      - name: Build and install API
+        run: cd api && mvn -B -V -U -C -Poss-release -Pstaging clean install -DskipTests -Dgpg.skip=true
+      - name: Build and install Parsson with this API
+        run: |
+          cd parsson
+          git log -1 --format='Parsson fork at %H %s'
+          mvn -B -V -U -C -Pstaging clean install -pl impl -am -DskipTests -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT
+      - name: Build and install Johnzon core with this API
+        run: |
+          cd johnzon
+          git log -1 --format='Johnzon fork at %H %s'
+          mvn -B -V -C -N install -DskipTests -Drat.skip=true -Dcheckstyle.skip=true
+          mvn -B -V -C install -pl johnzon-core -DskipTests -Drat.skip=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true
+      - name: Restore the corpus
+        uses: actions/cache@v4
+        with:
+          path: evidence/fuzz/target/fuzz/${{ matrix.target }}/.cifuzz-corpus
+          key: fuzz-corpus-${{ matrix.target }}-${{ github.run_id }}
+          restore-keys: fuzz-corpus-${{ matrix.target }}-
+      - name: Fuzz ${{ matrix.target }} for ${{ inputs.duration || '2m' }}
+        run: |
+          set -o pipefail
+          cd evidence && mvn -B -V -C test -pl fuzz -Pfuzz "-Dfuzz.target=$TARGET" "-Dfuzz.duration=$DURATION" 2>&1 | tee ../fuzz.log
+        env:
+          TARGET: ${{ matrix.target }}
+          DURATION: ${{ inputs.duration || '2m' }}
+      - name: Show the fuzzer's last status
+        if: always()
+        run: grep -a -E '^#[0-9]+.*(DONE|pulse)|== Java Exception|FuzzTestFinding|Tests run:' fuzz.log | tail -20 || true
+      - name: Upload findings
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-findings-${{ matrix.target }}
+          path: |
+            evidence/fuzz/target/fuzz/${{ matrix.target }}/crash-*
+            evidence/fuzz/target/fuzz/${{ matrix.target }}/timeout-*
+            evidence/fuzz/target/surefire-reports/
+            fuzz.log
+          if-no-files-found: ignore
