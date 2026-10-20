@@ -1,0 +1,279 @@
+class,method,line,mutator,description,status
+Ast,<init>,170,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Ast,<init>,170,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Ast,<init>,171,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,visit,135,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,visit,135,Math,Replaced Unsigned Shift Right with Shift Left,SURVIVED
+Evaluator,visit,135,Math,Replaced Unsigned Shift Right with Shift Left,SURVIVED
+Evaluator,visit,135,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Evaluator,visitNodes,147,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,visitNodes,147,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Evaluator,visitNodes,151,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,visitNodes,151,Math,Replaced Unsigned Shift Right with Shift Left,SURVIVED
+Evaluator,visitNodes,151,Math,Replaced Unsigned Shift Right with Shift Left,SURVIVED
+Evaluator,visitNodes,151,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,visitNodes,151,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Evaluator,checkLimits,174,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,checkDepth,184,Math,Replaced integer addition with subtraction,SURVIVED
+Evaluator,firstOf,218,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,lambda$firstOf$0,223,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::lambda$firstOf$0,SURVIVED
+Evaluator,apply,242,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::apply,SURVIVED
+Evaluator,apply,246,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::apply,SURVIVED
+Evaluator,apply,259,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,apply,260,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::apply,SURVIVED
+Evaluator,reverse,286,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,pushChildren,300,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,pushChildren,301,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Evaluator::checkDepth,SURVIVED
+Evaluator,pushChildren,303,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,pushChildren,313,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,select,328,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,select,329,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::select,SURVIVED
+Evaluator,select,340,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::select,SURVIVED
+Evaluator,select,343,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,select,345,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,select,346,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::select,NO_COVERAGE
+Evaluator,select,360,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::select,SURVIVED
+Evaluator,select,376,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,select,377,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::select,SURVIVED
+Evaluator,select,381,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::select,SURVIVED
+Evaluator,selectChildren,398,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,selectChildren,399,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::selectChildren,SURVIVED
+Evaluator,selectChildren,405,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,selectChildren,410,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,selectChildren,411,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::selectChildren,SURVIVED
+Evaluator,selectChild,420,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::selectChild,SURVIVED
+Evaluator,slice,431,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,slice,431,Math,Replaced long subtraction with addition,SURVIVED
+Evaluator,slice,432,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,slice,435,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Evaluator,slice,439,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,slice,440,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::slice,SURVIVED
+Evaluator,slice,445,Math,Replaced long subtraction with addition,SURVIVED
+Evaluator,slice,447,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Evaluator,slice,448,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::slice,NO_COVERAGE
+Evaluator,sliced,457,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Evaluator::visit,SURVIVED
+Evaluator,sliced,458,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Evaluator::sliced,SURVIVED
+JsonPathMessages,excerpt,64,ConditionalsBoundary,changed conditional boundary,SURVIVED
+JsonPathMessages,excerpt,65,Math,Replaced integer subtraction with addition,SURVIVED
+JsonPathMessages,excerpt,76,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Limits,property,128,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Limits,property,130,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+NodeImpl,getPath,139,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+NodeImpl,getPath,146,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+NodeImpl,appendName,200,ConditionalsBoundary,changed conditional boundary,SURVIVED
+NodeImpl,toString,212,EmptyObjectReturnVals,"replaced return value with """" for org/apache/johnzon/core/jsonpath/NodeImpl::toString",NO_COVERAGE
+Parser,bracketedSelection,185,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Parser::skipBlanks,SURVIVED
+Parser,selector,205,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,selector,209,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,selector,209,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,indexOrSlice,221,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,optionalInt,256,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,optionalInt,261,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,memberNameShorthand,281,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,basicExpr,334,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,basicExpr,338,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Parser::skipBlanks,SURVIVED
+Parser,basicExpr,339,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,basicExpr,361,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Parser::checkComparable,SURVIVED
+Parser,parenExpr,374,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Parser::skipBlanks,SURVIVED
+Parser,parenExpr,376,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Parser::skipBlanks,SURVIVED
+Parser,parenExpr,378,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,operand,412,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,operand,412,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,functionCall,459,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,argument,475,NullReturnVals,replaced return value with null for org/apache/johnzon/core/jsonpath/Parser::argument,NO_COVERAGE
+Parser,checkLogical,500,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,checkLogical,501,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Parser::checkLogical,SURVIVED
+Parser,checkArgument,525,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,checkArgument,526,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Parser::checkLogical,NO_COVERAGE
+Parser,checkArgument,529,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,checkArgument,529,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,checkArgument,529,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,checkArgument,535,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,checkArgument,535,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+Parser,number,555,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,number,579,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,stringLiteral,615,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,stringLiteral,615,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,escape,624,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,624,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,escape,625,Math,Replaced integer subtraction with addition,NO_COVERAGE
+Parser,escape,653,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,escape,659,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,660,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,escape,665,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,665,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,665,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,escape,669,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,escape,676,Math,Replaced integer subtraction with addition,SURVIVED
+Parser,hex4,681,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,hex4,681,Math,Replaced integer addition with subtraction,SURVIVED
+Parser,hex4,681,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,isNameFirst,708,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,isFunctionNameChar,720,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,isFunctionNameChar,720,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,isFunctionNameChar,720,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Parser,peek,731,PrimitiveReturns,replaced int return with 0 for org/apache/johnzon/core/jsonpath/Parser::peek,SURVIVED
+Parser,peek,734,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Parser,peek,734,Math,Replaced integer addition with subtraction,SURVIVED
+Parser,expect,742,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Parser,unmodifiable,749,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Patterns,<init>,51,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Patterns,get,58,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,decidedAtOnce,122,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,138,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,139,BooleanFalseReturnVals,replaced boolean return with false for org/apache/johnzon/core/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,139,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,141,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,142,BooleanFalseReturnVals,replaced boolean return with false for org/apache/johnzon/core/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,142,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,145,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,containsAbsoluteQuery,148,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/StreamingMatcher::containsAbsoluteQuery,SURVIVED
+StreamingMatcher,selects,196,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,selects,196,Math,Replaced long subtraction with addition,SURVIVED
+StreamingMatcher,selects,197,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,selects,200,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,selects,206,Math,Replaced long subtraction with addition,SURVIVED
+StreamingMatcher,selects,207,InvertNegs,removed negation,SURVIVED
+StreamingMatcher,threshold,222,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,threshold,225,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,threshold,228,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,threshold,228,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,add,313,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,add,313,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+StreamingMatcher,getColumnNumber,415,PrimitiveReturns,replaced long return with 0 for org/apache/johnzon/core/jsonpath/StreamingMatcher$Location::getColumnNumber,NO_COVERAGE
+StreamingMatcher,toString,425,EmptyObjectReturnVals,"replaced return value with """" for org/apache/johnzon/core/jsonpath/StreamingMatcher$Location::toString",NO_COVERAGE
+StreamingMatcher,find,485,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,bufferedNodes,530,PrimitiveReturns,replaced long return with 0 for org/apache/johnzon/core/jsonpath/StreamingMatcher::bufferedNodes,SURVIVED
+StreamingMatcher,start,603,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/Evaluator::visitNodes,SURVIVED
+StreamingMatcher,hold,642,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,hold,644,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,release,657,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,proceed,733,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/StreamingMatcher::buffer,SURVIVED
+StreamingMatcher,live,787,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,live,787,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,childItems,798,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,select,825,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,select,825,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+StreamingMatcher,filterDecision,872,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,indexDecision,887,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+StreamingMatcher,indexDecision,893,ConditionalsBoundary,changed conditional boundary,SURVIVED
+StreamingMatcher,indexDecision,893,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+StreamingMatcher,decideIndices,915,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Values,jsonEquals,171,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,171,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,187,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,188,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Values::jsonEquals,NO_COVERAGE
+Values,jsonEquals,190,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Values,jsonEquals,202,ConditionalsBoundary,changed conditional boundary,SURVIVED
+Values,jsonEquals,202,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,202,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+Values,jsonEquals,207,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+Values,jsonEquals,208,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/Values::jsonEquals,NO_COVERAGE
+Values,jsonEquals,210,Math,Replaced integer addition with subtraction,SURVIVED
+CharSet,contains,160,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+CharSet,contains,160,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+CharSet,build,203,ConditionalsBoundary,changed conditional boundary,SURVIVED
+CharSet,build,203,Math,Replaced integer addition with subtraction,SURVIVED
+CharSet,toString,221,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,NO_COVERAGE
+CharSet,toString,221,EmptyObjectReturnVals,"replaced return value with """" for org/apache/johnzon/core/jsonpath/regex/CharSet::toString",NO_COVERAGE
+IRegexp,reserveShared,156,ConditionalsBoundary,changed conditional boundary,SURVIVED
+IRegexp,reserveShared,157,InvertNegs,removed negation,SURVIVED
+IRegexp,reserveShared,159,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/regex/IRegexp::reserveShared,SURVIVED
+IRegexp,programSize,197,PrimitiveReturns,replaced int return with 0 for org/apache/johnzon/core/jsonpath/regex/IRegexp::programSize,SURVIVED
+IRegexp,automatonBytes,207,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+IRegexp,automatonBytes,208,PrimitiveReturns,replaced long return with 0 for org/apache/johnzon/core/jsonpath/regex/IRegexp::automatonBytes,SURVIVED
+IRegexp,automaton,239,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+IRegexp,automaton,239,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+IRegexp,automaton,244,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+IRegexp,automaton,244,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,reserve,75,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,reserve,76,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/regex/LazyDfa::reserve,SURVIVED
+LazyDfa,reserve,78,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,reserve,80,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/regex/LazyDfa::reserve,SURVIVED
+LazyDfa,reserve,82,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,reserve,83,InvertNegs,removed negation,SURVIVED
+LazyDfa,reserve,84,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/regex/LazyDfa::reserve,SURVIVED
+LazyDfa,release,90,InvertNegs,removed negation,NO_COVERAGE
+LazyDfa,release,91,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/regex/IRegexp::releaseShared,NO_COVERAGE
+LazyDfa,run,114,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,run,114,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,run,130,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/regex/LazyDfa$State::cache,SURVIVED
+LazyDfa,run,136,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,run,136,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,closureState,171,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,closureState,190,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,closureState,191,NullReturnVals,replaced return value with null for org/apache/johnzon/core/jsonpath/regex/LazyDfa::closureState,SURVIVED
+LazyDfa,closureState,193,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,closureState,193,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,closureState,196,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,closureState,196,Math,Replaced long multiplication with division,SURVIVED
+LazyDfa,closureState,197,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,closureState,202,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,closureState,203,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/regex/LazyDfa::release,NO_COVERAGE
+LazyDfa,closureState,204,NullReturnVals,replaced return value with null for org/apache/johnzon/core/jsonpath/regex/LazyDfa::closureState,NO_COVERAGE
+LazyDfa,sorted,251,VoidMethodCall,removed call to java/util/Arrays::sort,SURVIVED
+LazyDfa,reachesMatchAtEnd,258,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,<init>,303,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,<init>,303,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,<init>,303,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,transition,308,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,transition,308,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,transition,309,NullReturnVals,replaced return value with null for org/apache/johnzon/core/jsonpath/regex/LazyDfa$State::transition,SURVIVED
+LazyDfa,transition,312,NullReturnVals,replaced return value with null for org/apache/johnzon/core/jsonpath/regex/LazyDfa$State::transition,SURVIVED
+LazyDfa,cache,316,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,cache,316,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,cache,325,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,cache,333,ConditionalsBoundary,changed conditional boundary,SURVIVED
+LazyDfa,cache,333,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,cache,333,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,cache,333,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+LazyDfa,cache,334,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,cache,335,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/regex/LazyDfa::release,NO_COVERAGE
+LazyDfa,bytes,363,PrimitiveReturns,replaced long return with 0 for org/apache/johnzon/core/jsonpath/regex/LazyDfa::bytes,SURVIVED
+LazyDfa,<init>,377,Math,Replaced integer multiplication with division,SURVIVED
+LazyDfa,<init>,377,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,<init>,377,Math,Replaced integer multiplication with division,SURVIVED
+LazyDfa,<init>,377,Math,Replaced integer addition with subtraction,SURVIVED
+LazyDfa,equals,382,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,equals,383,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/regex/LazyDfa$StateKey::equals,NO_COVERAGE
+LazyDfa,equals,386,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,equals,386,BooleanTrueReturnVals,replaced boolean return with true for org/apache/johnzon/core/jsonpath/regex/LazyDfa$StateKey::equals,SURVIVED
+LazyDfa,equals,387,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+LazyDfa,equals,388,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexCache,get,78,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexCache,lambda$get$0,82,EmptyObjectReturnVals,replaced Long return value with 0L for org/apache/johnzon/core/jsonpath/regex/RegexCache::lambda$get$0,SURVIVED
+RegexCache,get,84,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexCache,get,92,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexCache,get,93,EmptyObjectReturnVals,replaced return value with Optional.empty for org/apache/johnzon/core/jsonpath/regex/RegexCache::get,NO_COVERAGE
+RegexCache,get,95,Math,Replaced long addition with subtraction,SURVIVED
+RegexCache,instructions,107,PrimitiveReturns,replaced long return with 0 for org/apache/johnzon/core/jsonpath/regex/RegexCache::instructions,SURVIVED
+RegexParser,branch,58,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,piece,83,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,quantity,98,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,atom,112,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,atom,117,Math,Replaced integer subtraction with addition,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,isNormalChar,144,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
+RegexParser,category,194,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,charClass,224,VoidMethodCall,removed call to org/apache/johnzon/core/jsonpath/regex/CharSet$Builder::range,SURVIVED
+RegexParser,rangeFrom,250,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexParser,rangeFrom,250,Math,Replaced integer addition with subtraction,SURVIVED
+RegexParser,classChar,264,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,next,279,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,next,279,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexParser,expect,287,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexProgram,size,73,PrimitiveReturns,replaced int return with 0 for org/apache/johnzon/core/jsonpath/regex/RegexProgram::size,SURVIVED
+RegexProgram,emitAlternation,128,ConditionalsBoundary,changed conditional boundary,SURVIVED
+RegexSimulation,isDead,80,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexSimulation,isDead,80,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+RegexSimulation,runFrom,160,RemoveConditional_EQUAL_ELSE,removed conditional - replaced equality check with false,SURVIVED
+UnicodeCategories,type,58,RemoveConditional_ORDER_ELSE,removed conditional - replaced comparison check with false,SURVIVED
