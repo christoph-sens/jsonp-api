@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.christophsens.evidence</groupId>
+        <artifactId>evidence-parent</artifactId>
+        <version>0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>evidence-fuzz</artifactId>
+    <name>Fuzzing: Parsson and Johnzon (Jazzer)</name>
+
+    <!--
+      `mvn test` replays the seeds (the Compliance Test Suite and the regression cases in JsonPathFuzzTest) and the
+      saved findings under src/test/resources/.../JsonPathFuzzTestInputs/<target>/ (Jazzer's regression mode).
+      `mvn test -Pfuzz -Dfuzz.target=<target> -Dfuzz.duration=10m` fuzzes one target; Jazzer fuzzes one target per
+      JVM. Findings and the corpus are written to target/fuzz/<target>/. See RESULTS.md.
+    -->
+
+    <properties>
+        <jazzer.version>0.30.0</jazzer.version>
+        <fuzz.target>compileAnyQuery</fuzz.target>
+        <fuzz.duration>1m</fuzz.duration>
+        <evidence.cts>${project.basedir}/../../tck/tck-tests/src/main/resources/ee/jakarta/tck/jsonp/api/jsonpathtests/cts/cts.json</evidence.cts>
+        <!-- Coverage feedback from the implementations, not only from the test classes -->
+        <jazzer.instrument>org.eclipse.parsson.**,org.apache.johnzon.core.**</jazzer.instrument>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.johnzon</groupId>
+            <artifactId>johnzon-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.code-intelligence</groupId>
+            <artifactId>jazzer-junit</artifactId>
+            <version>${jazzer.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Without -OmitStackTraceInFastThrow, hot code throws ArrayIndexOutOfBoundsException without a stack trace,
+                         and Checks.isKnownParserDefect cannot tell where it came from. -->
+                    <argLine>-XX:+EnableDynamicAgentLoading -XX:-OmitStackTraceInFastThrow</argLine>
+                    <systemPropertyVariables>
+                        <evidence.cts>${evidence.cts}</evidence.cts>
+                        <jazzer.instrument>${jazzer.instrument}</jazzer.instrument>
+                        <!-- A replayed input that hangs fails the build instead of blocking it -->
+                        <junit.jupiter.execution.timeout.default>2m</junit.jupiter.execution.timeout.default>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>fuzz</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- Surefire does not create its working directory -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>fuzz-working-directory</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/fuzz/${fuzz.target}"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <test>JsonPathFuzzTest#${fuzz.target}</test>
+                            <workingDirectory>${project.build.directory}/fuzz/${fuzz.target}</workingDirectory>
+                            <environmentVariables>
+                                <JAZZER_FUZZ>1</JAZZER_FUZZ>
+                            </environmentVariables>
+                            <systemPropertyVariables>
+                                <evidence.cts>${evidence.cts}</evidence.cts>
+                                <jazzer.instrument>${jazzer.instrument}</jazzer.instrument>
+                                <jazzer.max_duration>${fuzz.duration}</jazzer.max_duration>
+                                <junit.jupiter.execution.timeout.default>24h</junit.jupiter.execution.timeout.default>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -16,6 +16,7 @@
     <modules>
         <module>differential</module>
         <module>benchmarks</module>
+        <module>fuzz</module>
     </modules>
 
     <properties>
