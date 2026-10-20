@@ -1,0 +1,56 @@
+#
+# JMH benchmarks of evidence/benchmarks. Manual only (workflow_dispatch): numbers from a shared CI runner are noisy
+# and the run takes about 15 minutes, so it does not run on push. The published numbers are in
+# evidence/benchmarks/RESULTS.md, with the machine they were taken on.
+#
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+    inputs:
+      jmh_args:
+        description: Extra JMH arguments, for example "QueryBenchmark -p query=filter"
+        default: ''
+
+jobs:
+  jmh:
+    name: JMH on JDK 21
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Parsson fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/parsson
+          ref: jsonpath
+          path: parsson
+      - name: Check out Johnzon fork
+        uses: actions/checkout@v4
+        with:
+          repository: christoph-sens/johnzon
+          ref: jsonpath
+          path: johnzon
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Build and install API
+        run: cd api && mvn -B -V -U -C -Poss-release -Pstaging clean install -DskipTests -Dgpg.skip=true
+      - name: Build and install Parsson with this API
+        run: cd parsson && mvn -B -V -U -C -Pstaging clean install -pl impl -am -DskipTests -Dgpg.skip=true -Djakarta.json-api.version=2.2.0-SNAPSHOT
+      - name: Build and install Johnzon core with this API
+        run: |
+          cd johnzon
+          mvn -B -V -C -N install -DskipTests -Drat.skip=true -Dcheckstyle.skip=true
+          mvn -B -V -C install -pl johnzon-core -DskipTests -Drat.skip=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true
+      - name: Build the benchmarks (runs the fairness test)
+        run: cd evidence && mvn -B -V -U -C package -pl benchmarks
+      - name: Run JMH
+        run: cd evidence/benchmarks && java -jar target/benchmarks.jar -rf json -rff jmh-results.json ${{ inputs.jmh_args }}
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmh-results
+          path: evidence/benchmarks/jmh-results.json

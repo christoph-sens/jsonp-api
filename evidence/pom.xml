@@ -15,6 +15,7 @@
 
     <modules>
         <module>differential</module>
+        <module>benchmarks</module>
     </modules>
 
     <properties>
@@ -24,6 +25,8 @@
         <parsson.version>1.1.7-SNAPSHOT</parsson.version>
         <johnzon.version>2.2.1-SNAPSHOT</johnzon.version>
         <treetrail.version>1.0.0</treetrail.version>
+        <jayway.version>3.0.0</jayway.version>
+        <jmh.version>1.37</jmh.version>
         <junit.version>5.11.4</junit.version>
     </properties>
 
