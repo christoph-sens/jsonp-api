@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Mutation testing of the JSONPath implementation in the Parsson fork (org.eclipse.parsson.jsonpath and .regex)
+  with PIT. The module has no sources of its own: it compiles the fork's main and test sources from
+  ${parsson.dir}/impl and runs PIT on them, so the fork's pom stays untouched. Run (from evidence/):
+
+    mvn -Pmutation -pl mutation test-compile org.pitest:pitest-maven:mutationCoverage -Dparsson.dir=/path/to/parsson
+
+  The fork must have been built once (the Compliance Test Suite is downloaded to impl/target/jsonpath-cts).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.christophsens.evidence</groupId>
+        <artifactId>evidence-parent</artifactId>
+        <version>0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>evidence-mutation</artifactId>
+    <name>Mutation testing (PIT) of the Parsson JSONPath implementation</name>
+
+    <properties>
+        <parsson.dir>${project.basedir}/../../parsson</parsson.dir>
+        <pitest.version>1.20.0</pitest.version>
+        <pitest.junit5.version>1.2.2</pitest.junit5.version>
+        <pitest.threads>6</pitest.threads>
+        <pitest.mutators>DEFAULTS</pitest.mutators>
+        <pitest.targetClasses>org.eclipse.parsson.jsonpath.*</pitest.targetClasses>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>2.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>${project.build.directory}/parsson-main</sourceDirectory>
+        <testSourceDirectory>${parsson.dir}/impl/src/test/java</testSourceDirectory>
+        <resources>
+            <resource>
+                <directory>${parsson.dir}/impl/src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>${parsson.dir}/impl/src/test/resources</directory>
+            </testResource>
+        </testResources>
+        <plugins>
+            <plugin>
+                <!-- The sources without module-info.java: PIT and the tests run on the class path. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-parsson-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/parsson-main</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${parsson.dir}/impl/src/main/java</directory>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <jsonpath.cts>${parsson.dir}/impl/target/jsonpath-cts/cts.json</jsonpath.cts>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>${pitest.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>${pitest.junit5.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>${pitest.targetClasses}</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>org.eclipse.parsson.jsonpath.*</param>
+                    </targetTests>
+                    <mutators>
+                        <mutator>${pitest.mutators}</mutator>
+                    </mutators>
+                    <threads>${pitest.threads}</threads>
+                    <jvmArgs>
+                        <value>-Djsonpath.cts=${parsson.dir}/impl/target/jsonpath-cts/cts.json</value>
+                    </jvmArgs>
+                    <outputFormats>
+                        <value>XML</value>
+                        <value>HTML</value>
+                    </outputFormats>
+                    <timestampedReports>false</timestampedReports>
+                    <failWhenNoMutations>false</failWhenNoMutations>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
