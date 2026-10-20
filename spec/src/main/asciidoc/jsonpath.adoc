@@ -94,7 +94,8 @@ I-JSON range in index and slice selectors, unknown function names and ill-typed 
 message of the exception gives the reason and the position in the query string.
 
 `createPath` also throws `JsonException` for a query that is nested deeper than the limit
-`MAX_NESTING` (<<jsonpath-limits>>), which is not a syntax error but is detected at the same time.
+`MAX_NESTING` (<<jsonpath-limits>>) and for a number literal that `BigDecimal` cannot represent
+(<<jsonpath-numbers>>). Neither is a syntax error, but both are detected at the same time.
 A query string that is `null` causes a `NullPointerException`.
 
 The functions are the five functions of RFC 9535: `length()`, `count()`, `match()`, `search()` and
@@ -142,6 +143,13 @@ Processing defines one comparison for all numbers:
   `BigDecimal.compareTo`. So `1`, `1.0`, `1e0` and `10e-1` are equal, `-0` equals `0`, and the
   comparison is exact also beyond the range and precision of `double`.
 * Number literals in a query are read exactly, as `BigDecimal`, never through `double`.
+* A number literal that `BigDecimal` cannot represent MUST make `createPath` throw `JsonException`.
+  This is the case if the scale the literal would have, the number of digits after its decimal
+  point minus its exponent, lies outside the range of `int`, as for `1e99999999999` and
+  `1e-99999999999`. RFC 9535 allows such a literal, but its value lies outside the range of exact
+  values, and RFC 9535 then requires an indication of overflow (RFC 9535, Section 2.1). The literal
+  does not depend on any document, so the overflow is reported when the JSONPath is created and
+  never by `query` or by a matcher.
 * `JsonNumber.equals` is not this comparison: it is `BigDecimal.equals`, which depends on the scale,
   so that `1.0` is not equal to `1`. The same holds for `JsonArray.equals` and `JsonObject.equals`.
   In comparisons of a filter, arrays and objects MUST be equal if their elements or members are
@@ -336,7 +344,8 @@ A node of the result has three methods: `getValue()` (<<jsonpath-nodes>>), `getP
 | `NullPointerException`
 | `createPath`, `query`, `matcher`
 
-| Query is not well-formed or not valid (<<jsonpath-syntax>>), or nested deeper than `MAX_NESTING`
+| Query is not well-formed or not valid (<<jsonpath-syntax>>), nested deeper than `MAX_NESTING`, or
+contains a number literal that `BigDecimal` cannot represent (<<jsonpath-numbers>>)
 | `JsonException`
 | `createPath`
 

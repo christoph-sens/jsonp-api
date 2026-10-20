@@ -331,8 +331,10 @@ public final class Json {
      *
      * @param query the JSONPath query string
      * @throws NullPointerException if {@code query} is {@code null}
-     * @throws JsonException if {@code query} is not a well-formed and valid JSONPath query;
-     *     the message gives the reason and the position in {@code query}
+     * @throws JsonException if {@code query} is not a well-formed and valid JSONPath query, if it
+     *     exceeds a limit that is checked when the query is created, or if it contains a number
+     *     that {@link java.math.BigDecimal} cannot represent; the message gives the reason and the
+     *     position in {@code query}
      * @throws UnsupportedOperationException if the JSON provider does not support JSONPath
      * @return a JSONPath query
      * @see JsonPath
@@ -356,8 +358,9 @@ public final class Json {
      * @param config a map of configuration properties, possibly empty
      * @throws NullPointerException if {@code query} or {@code config} is {@code null}
      * @throws JsonException if {@code query} is not a well-formed and valid JSONPath query, if it
-     *     exceeds a limit that is checked when the query is created, or if the value of a
-     *     configuration property is not valid
+     *     exceeds a limit that is checked when the query is created, if it contains a number that
+     *     {@link java.math.BigDecimal} cannot represent, or if the value of a configuration property
+     *     is not valid
      * @throws UnsupportedOperationException if the JSON provider does not support JSONPath
      * @return a JSONPath query
      * @see JsonPath
