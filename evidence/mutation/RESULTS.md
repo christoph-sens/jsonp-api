@@ -85,7 +85,7 @@ By kind of mutation (after):
 The Johnzon fork (`org.apache.johnzon.core.jsonpath` and `.regex`, branch `jsonpath`) was run with the same
 configuration and the same mutators (`-Pmutation,johnzon -Djohnzon.dir=...`), using Johnzon's own tests in that
 package (90 test classes, 245,115 test executions, 3 min 46 s). "After" adds the same `BoundaryTest` as in Parsson
-([christoph-sens/johnzon#5](https://github.com/christoph-sens/johnzon/pull/5), tests only).
+([christoph-sens/johnzon#6](https://github.com/christoph-sens/johnzon/pull/6), tests only).
 
 | Package | Mutants | Killed before | Killed after | Score before | Score after |
 |---|---:|---:|---:|---:|---:|
@@ -126,7 +126,7 @@ from the classes and mutators above and from reading the code at a sample of the
 
 PIT has no notion of "enough"; a floor stops the score from falling when code is added. Agreed minimum (confirmed by Christoph), the achieved score rounded down:
 
-| Scope | Achieved | Proposed minimum |
+| Scope | Achieved | Agreed minimum |
 |---|---:|---:|
 | `org.eclipse.parsson.jsonpath` | 84.8 % | 84 % |
 | `org.eclipse.parsson.jsonpath.regex` | 77.5 % | 77 % |
