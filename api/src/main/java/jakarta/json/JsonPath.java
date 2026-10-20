@@ -40,7 +40,9 @@ import jakarta.json.stream.JsonParser;
  *
  * <p>All errors in the query string, including integers outside the range
  * [-(2<sup>53</sup>)+1, (2<sup>53</sup>)-1] and invalid uses of functions, are reported
- * when the query is created ({@link Json#createPath(String)}). A query that is valid never
+ * when the query is created ({@link Json#createPath(String)}), and so is a number literal that
+ * {@link java.math.BigDecimal} cannot represent, such as {@code 1e99999999999}, whose scale would
+ * lie outside the range of {@code int}. A query that is valid never
  * fails because of the structure of the query argument: a name that does not exist or an
  * index outside an array selects nothing.</p>
  *

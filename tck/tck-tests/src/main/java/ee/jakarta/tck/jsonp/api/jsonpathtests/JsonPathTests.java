@@ -725,6 +725,46 @@ public class JsonPathTests {
   }
 
   /**
+   * @testName: jsonPathNumberRangeTest
+   *
+   * @assertion_ids: JSONP:JAVADOC:684; JSONP:JAVADOC:685; JSONP:JAVADOC:686;
+   *
+   * @test_Strategy: A number literal that BigDecimal cannot represent, because its
+   * scale would lie outside the range of int, is an overflow (RFC 9535, section 2.1):
+   * Json.createPath and JsonProvider.createPath throw JsonException with a message,
+   * without a document. Literals with large exponents whose scale lies within the
+   * range of int are read exactly and compared with the values of the document.
+   */
+  @Test
+  public void jsonPathNumberRangeTest() {
+    final String[] queries = {
+        "$[?@ == 1e99999999999]",
+        "$[?@ == 1e-99999999999]",
+        "$[?@ < -1.5E+99999999999]",
+        "$[?1e99999999999 > @.a]",
+        "$[?length(@) == 1e99999999999]",
+    };
+    for (String query : queries) {
+      LOGGER.info(" - createPath(\"" + query + "\") overflows");
+      final JsonException e = assertThrows(JsonException.class, () -> Json.createPath(query),
+          "Json.createPath(\"" + query + "\")");
+      assertNotNull(e.getMessage(), "Exception message for " + query);
+      assertFalse(e.getMessage().isEmpty(), "Exception message for " + query);
+      assertThrows(JsonException.class, () -> JsonProvider.provider().createPath(query),
+          "JsonProvider.createPath(\"" + query + "\")");
+      assertThrows(JsonException.class, () -> Json.createPath(query, Map.of()),
+          "Json.createPath(\"" + query + "\", Map.of())");
+    }
+
+    final JsonValue doc = parse("[1, 2e10, 0, -3]");
+    assertQuery(doc, "$[?@ < 1e999999999]", "$[0]", "$[1]", "$[2]", "$[3]");
+    assertQuery(doc, "$[?@ > -1E+999999999]", "$[0]", "$[1]", "$[2]", "$[3]");
+    assertQuery(doc, "$[?@ == 1e999999999]");
+    assertQuery(doc, "$[?@ > 1e-999999999]", "$[0]", "$[1]");
+    assertQuery(doc, "$[?@ < -1e-999999999]", "$[3]");
+  }
+
+  /**
    * @testName: jsonPathStringComparisonTest
    *
    * @assertion_ids: JSONP:JAVADOC:686;
